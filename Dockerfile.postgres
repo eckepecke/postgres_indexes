@@ -1,0 +1,20 @@
+# FROM postgres:15-alpine
+
+# # Install bash in Alpine
+# RUN apk add --no-cache bash
+
+# COPY scripts/entrypoint.sh /usr/local/bin/
+# COPY config/*.conf /docker-entrypoint-initconfig/
+# RUN chmod +x /usr/local/bin/entrypoint.sh && \
+#     chmod 0600 /docker-entrypoint-initconfig/*.conf
+
+# ENTRYPOINT ["entrypoint.sh"]
+
+FROM postgres:latest
+
+# Install required tools
+RUN apt-get update && apt-get install -y bash python3
+
+# Enable monitoring extensions
+RUN echo "shared_preload_libraries = 'pg_stat_statements'" >> /usr/share/postgresql/postgresql.conf.sample && \
+    echo "pg_stat_statements.track = all" >> /usr/share/postgresql/postgresql.conf.sample
