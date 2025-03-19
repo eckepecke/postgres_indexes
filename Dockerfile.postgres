@@ -1,20 +1,31 @@
-# FROM postgres:15-alpine
-
-# # Install bash in Alpine
-# RUN apk add --no-cache bash
-
-# COPY scripts/entrypoint.sh /usr/local/bin/
-# COPY config/*.conf /docker-entrypoint-initconfig/
-# RUN chmod +x /usr/local/bin/entrypoint.sh && \
-#     chmod 0600 /docker-entrypoint-initconfig/*.conf
-
-# ENTRYPOINT ["entrypoint.sh"]
-
+# Dockerfile.postgres
 FROM postgres:latest
 
-# Install required tools
-RUN apt-get update && apt-get install -y bash python3
+# Set environment variables
+ENV POSTGRES_USER=admin \
+    POSTGRES_PASSWORD=admin \
+    POSTGRES_DB=benchmarkdb
 
-# Enable monitoring extensions
-RUN echo "shared_preload_libraries = 'pg_stat_statements'" >> /usr/share/postgresql/postgresql.conf.sample && \
-    echo "pg_stat_statements.track = all" >> /usr/share/postgresql/postgresql.conf.sample
+# Copy configuration files
+COPY ./config/postgresql.conf /etc/postgresql/
+COPY ./config/pg_hba.conf /etc/postgresql/
+
+# Copy initialization script
+COPY ./scripts/init.sql /docker-entrypoint-initdb.d/
+
+# Set healthcheck
+HEALTHCHECK --interval=5s --timeout=5s --retries=5 \
+    CMD pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}
+
+# Set custom command
+CMD ["postgres", \
+    "-c", "config_file=/etc/postgresql/postgresql.conf", \
+    "-c", "hba_file=/etc/postgresql/pg_hba.conf"]
+# FROM postgres:latest
+
+# # Install required tools
+# RUN apt-get update && apt-get install -y bash python3
+
+# # Enable monitoring extensions
+# RUN echo "shared_preload_libraries = 'pg_stat_statements'" >> /usr/share/postgresql/postgresql.conf.sample && \
+#     echo "pg_stat_statements.track = all" >> /usr/share/postgresql/postgresql.conf.sample

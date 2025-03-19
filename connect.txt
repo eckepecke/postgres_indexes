@@ -1,0 +1,2 @@
+psql -h localhost -U admin -d benchmarkdb
+adress: 172.20.0.2
