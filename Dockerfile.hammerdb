@@ -2,4 +2,7 @@
 FROM tpcorg/hammerdb:latest
 
 # Copy your custom scripts into the image
-COPY ./scripts/hammerdb /home/HammerDB-4.12/scripts
+COPY ./scripts/hammerdb /home/HammerDB-4.12/scripts/python/postgres/
+
+# Copy your custom scripts into the image
+COPY ./scripts/hammerdb/tprocc/pg_tprocc_py.sh /home/HammerDB-4.12/

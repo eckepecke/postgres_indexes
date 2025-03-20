@@ -1,10 +1,10 @@
 # Dockerfile.postgres
 FROM postgres:latest
 
-# Set environment variables
-ENV POSTGRES_USER=admin \
-    POSTGRES_PASSWORD=admin \
-    POSTGRES_DB=benchmarkdb
+# Set environment variables for the DEFAULT superuser (postgres) and database
+ENV POSTGRES_USER=postgres \
+    POSTGRES_PASSWORD=postgres \
+    POSTGRES_DB=postgres
 
 # Copy configuration files
 COPY ./config/postgresql.conf /etc/postgresql/
@@ -21,11 +21,3 @@ HEALTHCHECK --interval=5s --timeout=5s --retries=5 \
 CMD ["postgres", \
     "-c", "config_file=/etc/postgresql/postgresql.conf", \
     "-c", "hba_file=/etc/postgresql/pg_hba.conf"]
-# FROM postgres:latest
-
-# # Install required tools
-# RUN apt-get update && apt-get install -y bash python3
-
-# # Enable monitoring extensions
-# RUN echo "shared_preload_libraries = 'pg_stat_statements'" >> /usr/share/postgresql/postgresql.conf.sample && \
-#     echo "pg_stat_statements.track = all" >> /usr/share/postgresql/postgresql.conf.sample

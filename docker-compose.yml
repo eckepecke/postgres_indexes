@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   postgres:
-    image: exjobb-postgres:1.0
+    image: postgres:1.1
     container_name: exjobb-postgres-1
     ports:
       - "5432:5432"
@@ -27,13 +27,11 @@ services:
       - postgres-net
 
   hammerdb:
-    #image: tpcorg/hammerdb:postgres
-    image: exjobb-hammerdb:1.0
-
+    image: hammerdb:1.1
     platform: linux/amd64 # Required for M1/M2 Macs
     container_name: exjobb-hammerdb
     # volumes:
-    #   - ./scripts/hammerdb:/home/HammerDB-4.12/custom_scripts # ✅ Replace default scripts
+    #   - ./scripts/hammerdb:/home/HammerDB-4.12/scripts # ✅ Replace default scripts
     networks:
       - postgres-net
     depends_on:
