@@ -31,9 +31,11 @@ services:
     platform: linux/amd64 # Required for M1/M2 Macs
     container_name: exjobb-hammerdb
     environment:
-      - RESULTS_DIR="/home/HammerDB-4.12/hammerdb_results"
-      - HAMMERDB_VU=4
-      - HAMMERDB_WAREHOUSES=10
+      - RESULTS_DIR=/home/HammerDB-4.12/hammerdb_results
+      - HAMMERDB_VU=10
+      - HAMMERDB_WAREHOUSES=12
+    volumes:
+      - ./hammerdb_results:/home/HammerDB-4.12/hammerdb_results
     networks:
       - postgres-net
     depends_on:
