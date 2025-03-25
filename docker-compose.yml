@@ -32,8 +32,8 @@ services:
     container_name: exjobb-hammerdb
     environment:
       - RESULTS_DIR=/home/HammerDB-4.12/hammerdb_results
-      - HAMMERDB_VU=10
-      - HAMMERDB_WAREHOUSES=12
+      - HAMMERDB_VU=${HAMMERDB_VU}
+      - HAMMERDB_WAREHOUSES=${HAMMERDB_WAREHOUSES}
     volumes:
       - ./hammerdb_results:/home/HammerDB-4.12/hammerdb_results
     networks:
