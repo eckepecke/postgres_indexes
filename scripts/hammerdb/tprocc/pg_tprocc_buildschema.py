@@ -13,14 +13,7 @@ diset('connection','pg_sslmode','prefer')
 # 🚀 Read from environment variables (with defaults)
 vu = int(os.getenv('HAMMERDB_VU', 4))  # Default: 4 virtual users
 warehouse = int(os.getenv('HAMMERDB_WAREHOUSES', 10))  # Default: 10 warehouses
-# vu = tclpy.eval('numberOfCPUs')
-# warehouse = int(vu) * 5
-# diset('tpcc','pg_count_ware',warehouse)
-# diset('tpcc','pg_num_vu',vu)
 
-# Override CPU-based calculation for better control
-# vu = 4                          # Example: 4 virtual users (adjust based on your needs)
-# warehouse = 10                  # Example: 10 warehouses (start small for testing)
 diset('tpcc','pg_count_ware', warehouse)
 diset('tpcc','pg_num_vu', vu)
 
@@ -32,15 +25,6 @@ diset('tpcc','pg_user','tpcc')
 diset('tpcc','pg_pass','tpcc')
 diset('tpcc','pg_dbase','tpcc')
 diset('tpcc','pg_tspace','pg_default')
-
-# if (warehouse >= 200): 
-#     diset('tpcc','pg_partition','true') 
-# else:
-#     diset('tpcc','pg_partition','false') 
-
-# 🚀 Partitioning (Disable for small datasets)
-# diset('tpcc','pg_partition','false') # Keep false if warehouses < 200
-# 🚀 Partitioning logic (optional)
 
 diset('tpcc', 'pg_partition', 'true' if warehouse >= 200 else 'false')
 

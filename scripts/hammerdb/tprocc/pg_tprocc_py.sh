@@ -1,6 +1,5 @@
 export TMP=`pwd`/TMP
 mkdir -p $TMP
-
 echo "BUILD HAMMERDB SCHEMA"
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 ./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_buildschema.py

@@ -34,6 +34,8 @@ services:
       - RESULTS_DIR=/home/HammerDB-4.12/hammerdb_results
       - HAMMERDB_VU=${HAMMERDB_VU}
       - HAMMERDB_WAREHOUSES=${HAMMERDB_WAREHOUSES}
+      - SCALEFACTOR=${HAMMERDB_SCALE_FACTOR}
+
     volumes:
       - ./hammerdb_results:/home/HammerDB-4.12/hammerdb_results
     networks:

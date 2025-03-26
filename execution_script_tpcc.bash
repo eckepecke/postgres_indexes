@@ -1,6 +1,13 @@
 #!/bin/bash
 
+# Ensure exactly 2 arguments are passed
+if [ "$#" -ne 2 ]; then
+    echo "Usage: $0 <HAMMERDB_VU> <HAMMERDB_WAREHOUSES>"
+    exit 1
+fi
+
 # Assign arguments
+# Hammer db recommends 2-4 VU per warehouse??
 HAMMERDB_VU=$1
 HAMMERDB_WAREHOUSES=$2
 
