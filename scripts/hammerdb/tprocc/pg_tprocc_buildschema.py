@@ -10,7 +10,6 @@ diset('connection','pg_host','postgres')
 diset('connection','pg_port','5432')
 diset('connection','pg_sslmode','prefer')
 
-# 🚀 Read from environment variables (with defaults)
 vu = int(os.getenv('HAMMERDB_VU', 4))  # Default: 4 virtual users
 warehouse = int(os.getenv('HAMMERDB_WAREHOUSES', 10))  # Default: 10 warehouses
 

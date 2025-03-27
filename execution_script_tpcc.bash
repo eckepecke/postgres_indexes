@@ -7,13 +7,14 @@ if [ "$#" -ne 2 ]; then
 fi
 
 # Assign arguments
-# Hammer db recommends 2-4 VU per warehouse??
 HAMMERDB_VU=$1
 HAMMERDB_WAREHOUSES=$2
 
 # Update existing .env file
-sed -i.bak "s/^HAMMERDB_VU=.*/HAMMERDB_VU=$HAMMERDB_VU/" .env
-sed -i.bak "s/^HAMMERDB_WAREHOUSES=.*/HAMMERDB_WAREHOUSES=$HAMMERDB_WAREHOUSES/" .env
+cat > .env <<EOF
+HAMMERDB_VU=$HAMMERDB_VU
+HAMMERDB_WAREHOUSES=$HAMMERDB_WAREHOUSES
+EOF
 
 echo "Updated .env file:"
 cat .env
