@@ -20,6 +20,8 @@ diset('tpch','pg_tpch_dbase','tpch')
 diset('tpch','pg_total_querysets','1')
 diset('tpch','pg_degree_of_parallel','2')
 
+
+
 loadscript()
 print("TEST STARTED")
 vuset('vu',vu)

@@ -37,3 +37,14 @@ SELECT
 FROM pg_indexes
 WHERE schemaname = 'public'
 ORDER BY tablename;
+
+
+-- check
+SELECT                                  
+    tablename AS table_name,
+    indexname AS index_name,
+    array_length(regexp_split_to_array(indexdef, ', '), 1) AS column_count,
+    indexdef AS index_definition
+FROM pg_indexes
+WHERE schemaname = 'public'
+ORDER BY column_count DESC, table_name, index_name;

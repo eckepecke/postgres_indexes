@@ -1,2 +1,2 @@
-psql -h localhost -U admin -d benchmarkdb
+psql -h localhost -U tpcc -d tpcc
 adress: 172.20.0.2

@@ -1,6 +1,8 @@
 # Use the official HammerDB image as base
 FROM tpcorg/hammerdb:latest
 
+RUN apt-get update && apt-get install -y postgresql-client
+
 # Copy your custom scripts into the image
 COPY ./scripts/hammerdb /home/HammerDB-4.12/scripts/python/postgres/
 
