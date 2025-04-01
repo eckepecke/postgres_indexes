@@ -32,16 +32,6 @@ diset('tpcc','pg_timeprofile','true')
 # diset('tpcc','pg_vacuum','true')
 
 # Load TPC-H script and inject planner flags
-script = """
-proc vu_init {} {
-    puts "Disabling B-tree scans and enabling hash indexes..."
-    dbexec "SET enable_trooper = Koopatroppa;"
-    dbexec "SET enable_indexscan = OFF;"
-    dbexec "SET enable_bitmapscan = OFF;"
-    dbexec "SET enable_seqscan = OFF;"
-    dbexec "ANALYZE customer;"
-}
-"""
 loadscript()
 
 

@@ -1,24 +1,3 @@
-# export TMP=`pwd`/TMP
-# mkdir -p $TMP
-# echo "BUILD HAMMERDB SCHEMA"
-# echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-# ./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_buildschema.py
-# echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-# echo "CHECK HAMMERDB SCHEMA"
-# echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-# ./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_checkschema.py
-# echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-# echo "RUN HAMMERDB TEST"
-# echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-# ./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_run.py
-# echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-# echo "DROP HAMMERDB SCHEMA"
-# ./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_deleteschema.py
-# echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-# echo "HAMMERDB RESULT"
-# ./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_result.py
-
-
 export TMP=`pwd`/TMP
 mkdir -p $TMP
 
@@ -32,25 +11,20 @@ echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 echo "DROP NON-PK MULTI-COLUMN INDEXES"
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 PGPASSWORD="tpcc" psql -h postgres -U tpcc -d tpcc <<EOF
--- 1. Drop non-PK multi-column indexes
-WITH droppable_indexes AS (
-  SELECT 
-    indexname AS index_name,
-    tablename AS table_name,
-    indexdef AS index_definition
-  FROM pg_indexes
-  WHERE schemaname = 'public'
-    AND indexname NOT IN (
-      SELECT conindid::regclass::text
-      FROM pg_constraint
-      WHERE contype = 'p'
-    )
-    AND array_length(string_to_array(indexdef, ','), 1) > 1
-)
-SELECT 
-  format('DROP INDEX IF EXISTS %I; -- Original: %s', index_name, index_definition) AS drop_command
-FROM droppable_indexes
-\gexec
+
+
+-- 2. Create HASH indexes (only on suitable columns)
+\echo '=== Adding more multi-column Indexes ==='
+
+
+-- For Payment Transaction:
+CREATE INDEX customer_c_last_idx ON customer USING btree (c_w_id, c_d_id, c_last, c_first);
+
+-- For Delivery Transaction:
+CREATE INDEX new_order_combo_idx ON new_order USING btree (no_w_id, no_d_id, no_o_id);
+
+-- For Stock-Level Transaction:
+CREATE INDEX stock_level_idx ON stock USING btree (s_w_id, s_quantity);
 
 SHOW enable_indexscan;
 SHOW enable_bitmapscan;

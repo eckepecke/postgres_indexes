@@ -99,5 +99,3 @@ HAMMERDB RESULT
   "8 Active Virtual Users configured",
   "TEST RESULT : System achieved 24422 NOPM from 55787 PostgreSQL TPM"
 ]
-
-

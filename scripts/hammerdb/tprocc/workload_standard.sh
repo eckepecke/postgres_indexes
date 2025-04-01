@@ -1,24 +1,3 @@
-# export TMP=`pwd`/TMP
-# mkdir -p $TMP
-# echo "BUILD HAMMERDB SCHEMA"
-# echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-# ./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_buildschema.py
-# echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-# echo "CHECK HAMMERDB SCHEMA"
-# echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-# ./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_checkschema.py
-# echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-# echo "RUN HAMMERDB TEST"
-# echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-# ./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_run.py
-# echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-# echo "DROP HAMMERDB SCHEMA"
-# ./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_deleteschema.py
-# echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-# echo "HAMMERDB RESULT"
-# ./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_result.py
-
-
 export TMP=`pwd`/TMP
 mkdir -p $TMP
 
@@ -26,31 +5,11 @@ echo "BUILD HAMMERDB SCHEMA"
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 ./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_buildschema.py
 
-echo "DROP NON-PK MULTI-COLUMN INDEXES"
-echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 # 2. Drop non-PK multi-column indexes
-echo "DROP NON-PK MULTI-COLUMN INDEXES"
+echo "BUILD FINISHED"
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 PGPASSWORD="tpcc" psql -h postgres -U tpcc -d tpcc <<EOF
--- 1. Drop non-PK multi-column indexes
-WITH droppable_indexes AS (
-  SELECT 
-    indexname AS index_name,
-    tablename AS table_name,
-    indexdef AS index_definition
-  FROM pg_indexes
-  WHERE schemaname = 'public'
-    AND indexname NOT IN (
-      SELECT conindid::regclass::text
-      FROM pg_constraint
-      WHERE contype = 'p'
-    )
-    AND array_length(string_to_array(indexdef, ','), 1) > 1
-)
-SELECT 
-  format('DROP INDEX IF EXISTS %I; -- Original: %s', index_name, index_definition) AS drop_command
-FROM droppable_indexes
-\gexec
+
 
 SHOW enable_indexscan;
 SHOW enable_bitmapscan;
