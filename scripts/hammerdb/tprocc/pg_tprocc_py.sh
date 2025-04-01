@@ -1,24 +1,3 @@
-# export TMP=`pwd`/TMP
-# mkdir -p $TMP
-# echo "BUILD HAMMERDB SCHEMA"
-# echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-# ./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_buildschema.py
-# echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-# echo "CHECK HAMMERDB SCHEMA"
-# echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-# ./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_checkschema.py
-# echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-# echo "RUN HAMMERDB TEST"
-# echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-# ./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_run.py
-# echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-# echo "DROP HAMMERDB SCHEMA"
-# ./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_deleteschema.py
-# echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-# echo "HAMMERDB RESULT"
-# ./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_result.py
-
-
 export TMP=`pwd`/TMP
 mkdir -p $TMP
 
@@ -77,12 +56,43 @@ echo "RUN HAMMERDB TEST"
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 ./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_run.py
 
+# Define output directories
+PG_METRICS_DIR="${RESULTS_DIR}/postgres_metrics"
+mkdir -p ${PG_METRICS_DIR}
+
 echo "CAPTURE INDEX METRICS"
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
+
+# Define output files
+INDEX_STORAGE_DETAILS="${PG_METRICS_DIR}/index_storage_tpcc.csv"
+INDEX_USAGE_DETAILS="${PG_METRICS_DIR}/index_usage_tpcc.csv"
+STORAGE_OVERVIEW="${PG_METRICS_DIR}/index_storage_overview_tpcc.csv"
+USAGE_STATISTICS="${PG_METRICS_DIR}/index_usage_statistics_tpcc.csv"
+PG_SETTINGS="${PG_METRICS_DIR}/postgres_settings_tpcc.txt"
+FULL_REPORT="${PG_METRICS_DIR}/full_report_tpcc.txt"
+
+# Capture all output to a full report file
+exec > >(tee -a "${FULL_REPORT}") 2>&1
+
 PGPASSWORD="tpcc" psql -h postgres -U tpcc -d tpcc <<EOF
--- Save metrics to CSV files
-\copy (SELECT indexname, tablename, pg_relation_size(indexname::regclass) AS size_bytes, indexdef FROM pg_indexes WHERE schemaname = 'public') TO '/tmp/index_storage_tpcc.csv' CSV HEADER;
-\copy (SELECT indexrelname, idx_scan, idx_tup_read, idx_tup_fetch FROM pg_stat_user_indexes WHERE schemaname = 'public') TO '/tmp/index_usage.csv' CSV HEADER;
+-- Save detailed metrics to CSV files
+\copy (SELECT indexname, tablename, pg_relation_size(indexname::regclass) AS size_bytes, indexdef FROM pg_indexes WHERE schemaname = 'public') TO '${INDEX_STORAGE_DETAILS}' CSV HEADER;
+\copy (SELECT indexrelname, idx_scan, idx_tup_read, idx_tup_fetch FROM pg_stat_user_indexes WHERE schemaname = 'public') TO '${INDEX_USAGE_DETAILS}' CSV HEADER;
+
+\echo '\n=== SAVING, ERROR??? ==='
+
+-- Save storage overhead summary to CSV
+\copy (SELECT indexname, tablename, pg_relation_size(indexname::regclass), pg_total_relation_size(tablename::regclass), ROUND(100 * pg_relation_size(indexname::regclass)::numeric / NULLIF(pg_total_relation_size(tablename::regclass), 0), 2), indexdef FROM pg_indexes WHERE schemaname = 'public' ORDER BY pg_relation_size(indexname::regclass) DESC) TO '${STORAGE_OVERVIEW}' CSV HEADER;
+
+
+-- Save index usage statistics to CSV
+\copy (SELECT indexrelname, pg_stat_user_indexes.schemaname, pg_stat_user_indexes.relname, pg_stat_user_indexes.idx_scan, pg_stat_user_indexes.idx_tup_read, pg_stat_user_indexes.idx_tup_fetch, ROUND(100.0 * pg_stat_user_indexes.idx_tup_fetch / NULLIF(pg_stat_user_indexes.idx_tup_read, 0), 2) FROM pg_stat_user_indexes JOIN pg_stat_user_tables ON pg_stat_user_indexes.relid = pg_stat_user_tables.relid WHERE pg_stat_user_indexes.schemaname = 'public' ORDER BY pg_stat_user_indexes.idx_scan DESC) TO '${USAGE_STATISTICS}' CSV HEADER;
+
+
+-- Save PostgreSQL settings
+\o ${PG_SETTINGS}
+SHOW ALL;
+\o
 
 -- Print summary to console
 \echo '\n=== INDEX STORAGE OVERHEAD ==='
@@ -98,9 +108,14 @@ FROM pg_indexes
 WHERE schemaname = 'public'
 ORDER BY pg_relation_size(indexname::regclass) DESC;
 
+\echo '\n=== DATABASE SETTINGS ==='
 SHOW enable_indexscan;
 SHOW enable_bitmapscan;
 SHOW enable_seqscan;
+SHOW work_mem;
+SHOW maintenance_work_mem;
+SHOW random_page_cost;
+SHOW effective_cache_size;
 
 \echo '\n=== INDEX USAGE STATISTICS ==='
 SELECT
@@ -116,9 +131,14 @@ WHERE pg_stat_user_indexes.schemaname = 'public'
 ORDER BY idx_scan DESC;
 EOF
 
-
-echo "DROP HAMMERDB SCHEMA"
-./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_deleteschema.py
+# echo "DROP HAMMERDB SCHEMA"
+# ./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_deleteschema.py
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 echo "HAMMERDB RESULT"
 ./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_result.py
+
+# Compress the metrics files for easy download
+tar -czvf "${RESULTS_DIR}/postgres_metrics.tar.gz" -C "${PG_METRICS_DIR}" .
+
+echo "PostgreSQL metrics saved to: ${PG_METRICS_DIR}"
+echo "Compressed metrics archive: ${RESULTS_DIR}/postgres_metrics.tar.gz"

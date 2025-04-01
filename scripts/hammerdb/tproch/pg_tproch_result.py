@@ -3,13 +3,13 @@ import sys
 
 tmpdir = os.getenv('TMP')
 outputfile = os.path.join(tmpdir, 'pg_tproch')
-result_file = os.path.join(tmpdir, 'benchmark_results.txt')  # New results file
+result_file = os.path.join(tmpdir, 'benchmark_results_tproch.txt')  # New results file
 
 result_folder = os.getenv('RESULTS_DIR', '/home/HammerDB-4.12/hammerdb_results')
 
 # Ensure result_folder is valid
 if result_folder:
-    result_file = os.path.join(result_folder, 'benchmark_results.txt')
+    result_file = os.path.join(result_folder, 'benchmark_results_tproch.txt')
 
 # Redirect standard output to a file
 with open(result_file, 'w') as f:
