@@ -1,57 +1,37 @@
 export TMP=`pwd`/TMP
 mkdir -p $TMP
 
-echo "BUILD HAMMERDB SCHEMA"
-echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_buildschema.py
+INDEX_SETTING="DROP"
+TIMESTAMP=$(TZ="Europe/Stockholm" date +"%Y%m%d_%H%M%S")
+RUN_DIR="${RESULTS_DIR}/TPCH/${INDEX_SETTING}/${TIMESTAMP}"
+PG_METRICS_DIR="${RUN_DIR}/postgres_metrics"
+mkdir -p ${PG_METRICS_DIR}
 
-# 2. Drop non-PK multi-column indexes
-echo "DROP NON-PK MULTI-COLUMN INDEXES"
+echo "BUILD HAMMERDB SCHEMA WITH MINIMAL MULTI-COLOMN INDEXES"
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-PGPASSWORD="tpcc" psql -h postgres -U tpcc -d tpcc <<EOF
--- 1. Drop non-PK multi-column indexes
-WITH droppable_indexes AS (
-  SELECT 
-    indexname AS index_name,
+./hammerdbcli py auto ./scripts/python/postgres/tproch/pg_tproch_buildschema.py
+echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
+echo "CHECK HAMMERDB SCHEMA"
+echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
+./hammerdbcli py auto ./scripts/python/postgres/tproch/pg_tproch_checkschema.py
+echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
+
+PGPASSWORD="tpch" psql -h postgres -U tpch -d tpch <<EOF
+
+-- 2. Verify index state
+\echo '=== Current Indexes ==='
+SELECT
     tablename AS table_name,
+    indexname AS index_name,
+    array_length(regexp_split_to_array(indexdef, ', '), 1) AS column_count,
     indexdef AS index_definition
-  FROM pg_indexes
-  WHERE schemaname = 'public'
-    AND indexname NOT IN (
-      SELECT conindid::regclass::text
-      FROM pg_constraint
-      WHERE contype = 'p'
-    )
-    AND array_length(string_to_array(indexdef, ','), 1) > 1
-)
-SELECT 
-  format('DROP INDEX IF EXISTS %I; -- Original: %s', index_name, index_definition) AS drop_command
-FROM droppable_indexes
-\gexec
+FROM pg_indexes
+WHERE schemaname = 'public'
+ORDER BY column_count DESC, table_name, index_name;
 
--- 2. Create HASH indexes (only on suitable columns)
-\echo '=== Creating HASH Indexes ==='
+-- Causes failure
+-- DROP INDEX IF EXISTS lineitem_part_supp_fkidx;
 
--- CREATE INDEX idx_customer_id_hash ON customer USING hash (c_id);
--- CREATE INDEX idx_order_id_hash ON orders USING hash (o_id);
--- CREATE INDEX idx_item_id_hash ON item USING hash (i_id);
--- CREATE INDEX idx_stock_id_hash ON stock USING hash (s_i_id);
-
--- For Payment Transaction:
-CREATE INDEX customer_c_last_idx ON customer USING btree (c_w_id, c_d_id, c_last, c_first);
-
--- For Delivery Transaction:
-CREATE INDEX new_order_combo_idx ON new_order USING btree (no_w_id, no_d_id, no_o_id);
-
--- For Stock-Level Transaction:
-CREATE INDEX stock_level_idx ON stock USING btree (s_w_id, s_quantity);
-
-SHOW enable_indexscan;
-SHOW enable_bitmapscan;
-SHOW enable_seqscan;
-
-
--- 4. Verify index state
 \echo '=== Current Indexes ==='
 SELECT 
   indexname AS name,
@@ -63,33 +43,26 @@ ORDER BY tablename, indexname;
 EOF
 
 
-echo "CHECK HAMMERDB SCHEMA"
-echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_checkschema.py
-
 echo "RUN HAMMERDB TEST"
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_run.py
-
-# Define output directories
-PG_METRICS_DIR="${RESULTS_DIR}/postgres_metrics"
-mkdir -p ${PG_METRICS_DIR}
+./hammerdbcli py auto ./scripts/python/postgres/tproch/pg_tproch_run.py
+echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 
 echo "CAPTURE INDEX METRICS"
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 
-# Define output files
-INDEX_STORAGE_DETAILS="${PG_METRICS_DIR}/index_storage_tpcc.csv"
-INDEX_USAGE_DETAILS="${PG_METRICS_DIR}/index_usage_tpcc.csv"
-STORAGE_OVERVIEW="${PG_METRICS_DIR}/index_storage_overview_tpcc.csv"
-USAGE_STATISTICS="${PG_METRICS_DIR}/index_usage_statistics_tpcc.csv"
-PG_SETTINGS="${PG_METRICS_DIR}/postgres_settings_tpcc.txt"
-FULL_REPORT="${PG_METRICS_DIR}/full_report_tpcc.txt"
+# Define output files relative to the run directory
+INDEX_STORAGE_DETAILS="${PG_METRICS_DIR}/index_storage_tpch.csv"
+INDEX_USAGE_DETAILS="${PG_METRICS_DIR}/index_usage_tpch.csv"
+STORAGE_OVERVIEW="${PG_METRICS_DIR}/index_storage_overview_tpch.csv"
+USAGE_STATISTICS="${PG_METRICS_DIR}/index_usage_statistics_tpch.csv"
+PG_SETTINGS="${PG_METRICS_DIR}/postgres_settings_tpch.txt"
+FULL_REPORT="${RUN_DIR}/full_report_tpch.txt"
 
-# Capture all output to a full report file
+# Capture all output to the full report in the run directory
 exec > >(tee "${FULL_REPORT}") 2>&1
 
-PGPASSWORD="tpcc" psql -h postgres -U tpcc -d tpcc <<EOF
+PGPASSWORD="tpch" psql -h postgres -U tpch -d tpch <<EOF
 -- Save detailed metrics to CSV files
 \echo '\n=== SAVING INDEX STATISTICS ==='
 
@@ -124,15 +97,6 @@ FROM pg_indexes
 WHERE schemaname = 'public'
 ORDER BY pg_relation_size(indexname::regclass) DESC;
 
-\echo '\n=== DATABASE SETTINGS ==='
-SHOW enable_indexscan;
-SHOW enable_bitmapscan;
-SHOW enable_seqscan;
-SHOW work_mem;
-SHOW maintenance_work_mem;
-SHOW random_page_cost;
-SHOW effective_cache_size;
-
 \echo '\n=== INDEX USAGE STATISTICS ==='
 SELECT
   indexrelname AS index,
@@ -148,13 +112,16 @@ ORDER BY idx_scan DESC;
 EOF
 
 echo "DROP HAMMERDB SCHEMA"
-./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_deleteschema.py
+./hammerdbcli py auto ./scripts/python/postgres/tproch/pg_tproch_deleteschema.py
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 echo "HAMMERDB RESULT"
-./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_result.py
+./hammerdbcli py auto ./scripts/python/postgres/tproch/pg_tproch_result.py
 
-# Compress the metrics files for easy download
-tar -czvf "${RESULTS_DIR}/postgres_metrics.tar.gz" -C "${PG_METRICS_DIR}" .
+# Save hammerdb result to correct folder
+cp "${RESULTS_DIR}/benchmark_results_tproch.txt" "${RUN_DIR}/"
+
+# Compress the entire run directory for easy download
+tar -czvf "${RUN_DIR}_${INDEX_SETTING}.tar.gz" -C "${RUN_DIR}/.." "$(basename "${RUN_DIR}")"
 
 echo "PostgreSQL metrics saved to: ${PG_METRICS_DIR}"
-echo "Compressed metrics archive: ${RESULTS_DIR}/postgres_metrics.tar.gz"
+echo "Compressed metrics archive: ${RUN_DIR}.tar.gz"

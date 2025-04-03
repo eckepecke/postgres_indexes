@@ -1,0 +1,99 @@
+
+=== SAVING INDEX STATISTICS ===
+COPY 16
+COPY 16
+COPY 16
+COPY 16
+
+=== INDEX STORAGE OVERHEAD ===
+            name             |  table   |  size   | table_size | pct_of_table |                                         definition                                          
+-----------------------------+----------+---------+------------+--------------+---------------------------------------------------------------------------------------------
+ lineitem_part_supp_fkidx    | lineitem | 181 MB  | 1501 MB    |        12.04 | CREATE INDEX lineitem_part_supp_fkidx ON public.lineitem USING btree (l_partkey, l_suppkey)
+ lineitem_pk                 | lineitem | 181 MB  | 1501 MB    |        12.03 | CREATE UNIQUE INDEX lineitem_pk ON public.lineitem USING btree (l_linenumber, l_orderkey)
+ idx_lineitem_orderkey_fkidx | lineitem | 129 MB  | 1501 MB    |         8.57 | CREATE INDEX idx_lineitem_orderkey_fkidx ON public.lineitem USING btree (l_orderkey)
+ order_customer_fkidx        | orders   | 32 MB   | 282 MB     |        11.43 | CREATE INDEX order_customer_fkidx ON public.orders USING btree (o_custkey)
+ orders_pk                   | orders   | 32 MB   | 282 MB     |        11.41 | CREATE UNIQUE INDEX orders_pk ON public.orders USING btree (o_orderkey)
+ partsupp_pk                 | partsupp | 24 MB   | 199 MB     |        12.07 | CREATE UNIQUE INDEX partsupp_pk ON public.partsupp USING btree (ps_partkey, ps_suppkey)
+ partsupp_supplier_fkidx     | partsupp | 17 MB   | 199 MB     |         8.62 | CREATE INDEX partsupp_supplier_fkidx ON public.partsupp USING btree (ps_suppkey)
+ partsupp_part_fkidx         | partsupp | 17 MB   | 199 MB     |         8.61 | CREATE INDEX partsupp_part_fkidx ON public.partsupp USING btree (ps_partkey)
+ part_pk                     | part     | 4408 kB | 37 MB      |        11.60 | CREATE UNIQUE INDEX part_pk ON public.part USING btree (p_partkey)
+ customer_nation_fkidx       | customer | 3320 kB | 35 MB      |         9.24 | CREATE INDEX customer_nation_fkidx ON public.customer USING btree (c_nationkey)
+ customer_pk                 | customer | 3312 kB | 35 MB      |         9.22 | CREATE UNIQUE INDEX customer_pk ON public.customer USING btree (c_custkey)
+ supplier_pk                 | supplier | 240 kB  | 2320 kB    |        10.34 | CREATE UNIQUE INDEX supplier_pk ON public.supplier USING btree (s_suppkey)
+ supplier_nation_fkidx       | supplier | 240 kB  | 2320 kB    |        10.34 | CREATE INDEX supplier_nation_fkidx ON public.supplier USING btree (s_nationkey)
+ nation_pk                   | nation   | 16 kB   | 48 kB      |        33.33 | CREATE UNIQUE INDEX nation_pk ON public.nation USING btree (n_nationkey)
+ nation_regionkey_fkidx      | nation   | 16 kB   | 48 kB      |        33.33 | CREATE INDEX nation_regionkey_fkidx ON public.nation USING btree (n_regionkey)
+ region_pk                   | region   | 16 kB   | 32 kB      |        50.00 | CREATE UNIQUE INDEX region_pk ON public.region USING btree (r_regionkey)
+(16 rows)
+
+
+=== INDEX USAGE STATISTICS ===
+            index            |  table   |  scans  | tuples_read | tuples_fetched | efficiency_pct 
+-----------------------------+----------+---------+-------------+----------------+----------------
+ idx_lineitem_orderkey_fkidx | lineitem | 2122727 |    12458137 |        6806308 |          54.63
+ orders_pk                   | orders   |  513463 |      513463 |         513418 |          99.99
+ lineitem_part_supp_fkidx    | lineitem |  236079 |     2480206 |        1757409 |          70.86
+ order_customer_fkidx        | orders   |  189560 |     1694503 |        1679968 |          99.14
+ customer_pk                 | customer |   48186 |     1524268 |         624202 |          40.95
+ supplier_pk                 | supplier |   29409 |       39408 |          29318 |          74.40
+ nation_pk                   | nation   |   19844 |       19844 |          19844 |         100.00
+ partsupp_part_fkidx         | partsupp |   13652 |      854484 |          54444 |           6.37
+ partsupp_supplier_fkidx     | partsupp |   10448 |      831416 |         831360 |          99.99
+ part_pk                     | part     |      76 |      400074 |              0 |           0.00
+ supplier_nation_fkidx       | supplier |      47 |       76392 |              0 |           0.00
+ region_pk                   | region   |      32 |          32 |             32 |         100.00
+ partsupp_pk                 | partsupp |      11 |     5600004 |              0 |           0.00
+ lineitem_pk                 | lineitem |       0 |           0 |              0 |               
+ nation_regionkey_fkidx      | nation   |       0 |           0 |              0 |               
+ customer_nation_fkidx       | customer |       0 |           0 |              0 |               
+(16 rows)
+
+DROP HAMMERDB SCHEMA
+HammerDB CLI v4.12
+Copyright (C) 2003-2024 Steve Shaw
+Type "help()" for a list of commands
+exec(open('./scripts/python/postgres/tproch/pg_tproch_deleteschema.py').read())
+SETTING CONFIGURATION
+Database set to PostgreSQL
+Benchmark set to TPC-H for PostgreSQL
+Value postgres for connection:pg_host is the same as existing value postgres, no change made
+Value 5432 for connection:pg_port is the same as existing value 5432, no change made
+Value prefer for connection:pg_sslmode is the same as existing value prefer, no change made
+Value postgres for tpch:pg_tpch_superuser is the same as existing value postgres, no change made
+Value postgres for tpch:pg_tpch_superuserpass is the same as existing value postgres, no change made
+Value postgres for tpch:pg_tpch_defaultdbase is the same as existing value postgres, no change made
+Value tpch for tpch:pg_tpch_user is the same as existing value tpch, no change made
+Value tpch for tpch:pg_tpch_pass is the same as existing value tpch, no change made
+Value tpch for tpch:pg_tpch_dbase is the same as existing value tpch, no change made
+Value pg_default for tpch:pg_tpch_tspace is the same as existing value pg_default, no change made
+DROP SCHEMA STARTED
+Script cleared
+Deleting schema with 1 Virtual User
+Do you want to delete the TPCH TPROC-H schema and role TPCH
+ in host POSTGRES:5432 under user POSTGRES?
+Enter yes or no: replied yes
+Vuser 1 created - WAIT IDLE
+Vuser 1:RUNNING
+Vuser 1:tpch TPROC-H schema has been deleted successfully.
+Vuser 1:tpch TPROC-H role has been deleted successfully.
+Vuser 1:FINISHED SUCCESS
+ALL VIRTUAL USERS COMPLETE
+TPROC-H Driver Script
+DROP SCHEMA COMPLETED
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+HAMMERDB RESULT
+HammerDB CLI v4.12
+Copyright (C) 2003-2024 Steve Shaw
+Type "help()" for a list of commands
+exec(open('./scripts/python/postgres/tproch/pg_tproch_result.py').read())
+20250403_173332/
+20250403_173332/full_report_tpch.txt
+20250403_173332/benchmark_results_tproch.txt
+20250403_173332/postgres_metrics/
+20250403_173332/postgres_metrics/index_storage_overview_tpch.csv
+20250403_173332/postgres_metrics/index_usage_statistics_tpch.csv
+20250403_173332/postgres_metrics/postgres_settings_tpch.txt
+20250403_173332/postgres_metrics/index_storage_tpch.csv
+20250403_173332/postgres_metrics/index_usage_tpch.csv
+PostgreSQL metrics saved to: /home/HammerDB-4.12/hammerdb_results/TPCH/DROP/20250403_173332/postgres_metrics
+Compressed metrics archive: /home/HammerDB-4.12/hammerdb_results/TPCH/DROP/20250403_173332.tar.gz

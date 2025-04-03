@@ -1,0 +1,52 @@
+
+=== SAVING INDEX STATISTICS ===
+COPY 15
+COPY 15
+COPY 15
+COPY 15
+
+=== INDEX STORAGE OVERHEAD ===
+            name             |  table   |  size   | table_size | pct_of_table |                                        definition                                         
+-----------------------------+----------+---------+------------+--------------+-------------------------------------------------------------------------------------------
+ lineitem_pk                 | lineitem | 181 MB  | 1320 MB    |        13.67 | CREATE UNIQUE INDEX lineitem_pk ON public.lineitem USING btree (l_linenumber, l_orderkey)
+ idx_lineitem_orderkey_fkidx | lineitem | 129 MB  | 1320 MB    |         9.75 | CREATE INDEX idx_lineitem_orderkey_fkidx ON public.lineitem USING btree (l_orderkey)
+ order_customer_fkidx        | orders   | 32 MB   | 282 MB     |        11.43 | CREATE INDEX order_customer_fkidx ON public.orders USING btree (o_custkey)
+ orders_pk                   | orders   | 32 MB   | 282 MB     |        11.42 | CREATE UNIQUE INDEX orders_pk ON public.orders USING btree (o_orderkey)
+ partsupp_pk                 | partsupp | 24 MB   | 199 MB     |        12.08 | CREATE UNIQUE INDEX partsupp_pk ON public.partsupp USING btree (ps_partkey, ps_suppkey)
+ partsupp_supplier_fkidx     | partsupp | 17 MB   | 199 MB     |         8.62 | CREATE INDEX partsupp_supplier_fkidx ON public.partsupp USING btree (ps_suppkey)
+ partsupp_part_fkidx         | partsupp | 17 MB   | 199 MB     |         8.61 | CREATE INDEX partsupp_part_fkidx ON public.partsupp USING btree (ps_partkey)
+ part_pk                     | part     | 4408 kB | 37 MB      |        11.60 | CREATE UNIQUE INDEX part_pk ON public.part USING btree (p_partkey)
+ customer_nation_fkidx       | customer | 3320 kB | 35 MB      |         9.24 | CREATE INDEX customer_nation_fkidx ON public.customer USING btree (c_nationkey)
+ customer_pk                 | customer | 3312 kB | 35 MB      |         9.22 | CREATE UNIQUE INDEX customer_pk ON public.customer USING btree (c_custkey)
+ supplier_nation_fkidx       | supplier | 240 kB  | 2320 kB    |        10.34 | CREATE INDEX supplier_nation_fkidx ON public.supplier USING btree (s_nationkey)
+ supplier_pk                 | supplier | 240 kB  | 2320 kB    |        10.34 | CREATE UNIQUE INDEX supplier_pk ON public.supplier USING btree (s_suppkey)
+ region_pk                   | region   | 16 kB   | 32 kB      |        50.00 | CREATE UNIQUE INDEX region_pk ON public.region USING btree (r_regionkey)
+ nation_regionkey_fkidx      | nation   | 16 kB   | 48 kB      |        33.33 | CREATE INDEX nation_regionkey_fkidx ON public.nation USING btree (n_regionkey)
+ nation_pk                   | nation   | 16 kB   | 48 kB      |        33.33 | CREATE UNIQUE INDEX nation_pk ON public.nation USING btree (n_nationkey)
+(15 rows)
+
+
+=== INDEX USAGE STATISTICS ===
+            index            |  table   | scans  | tuples_read | tuples_fetched | efficiency_pct 
+-----------------------------+----------+--------+-------------+----------------+----------------
+ idx_lineitem_orderkey_fkidx | lineitem | 856533 |     8598684 |        2599080 |          30.23
+ order_customer_fkidx        | orders   | 132359 |     1323215 |        1323201 |         100.00
+ orders_pk                   | orders   |  16047 |     4516044 |          37467 |           0.83
+ supplier_pk                 | supplier |   2512 |       12511 |           2491 |          19.91
+ partsupp_supplier_fkidx     | partsupp |    756 |       60164 |          60160 |          99.99
+ nation_pk                   | nation   |     28 |          28 |             28 |         100.00
+ customer_pk                 | customer |     20 |      546043 |          96513 |          17.67
+ supplier_nation_fkidx       | supplier |     15 |       73122 |              0 |           0.00
+ part_pk                     | part     |     11 |      600008 |              0 |           0.00
+ region_pk                   | region   |      8 |           8 |              8 |         100.00
+ partsupp_pk                 | partsupp |      7 |     2400004 |              0 |           0.00
+ partsupp_part_fkidx         | partsupp |      2 |     1600000 |              0 |           0.00
+ nation_regionkey_fkidx      | nation   |      0 |           0 |              0 |               
+ customer_nation_fkidx       | customer |      0 |           0 |              0 |               
+ lineitem_pk                 | lineitem |      0 |           0 |              0 |               
+(15 rows)
+
+DROP HAMMERDB SCHEMA
+HammerDB CLI v4.12
+Copyright (C) 2003-2024 Steve Shaw
+Type "help()" for a list of commands
