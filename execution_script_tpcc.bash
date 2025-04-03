@@ -1,14 +1,19 @@
 #!/bin/bash
 
 # Ensure exactly 2 arguments are passed
-if [ "$#" -ne 2 ]; then
-    echo "Usage: $0 <HAMMERDB_VU> <HAMMERDB_WAREHOUSES>"
+if [ "$#" -ne 3 ]; then
+    echo "Usage: $0 <HAMMERDB_VU> <HAMMERDB_WAREHOUSES> <INDEX_SETTING>"
+    echo "Possible settings:"
+    echo "1. DROP"
+    echo "2. TPCC_STANDARD"
+    echo "3. MORE_MULTI_COLUMN"
     exit 1
 fi
 
 # Assign arguments
 HAMMERDB_VU=$1
 HAMMERDB_WAREHOUSES=$2
+INDEX_SETTING=$3
 
 # Update existing .env file
 cat > .env <<EOF
@@ -32,4 +37,4 @@ while ! docker inspect --format '{{.State.Running}}' exjobb-hammerdb 2>/dev/null
     sleep 1
 done
 
-docker exec -it exjobb-hammerdb bash -c "./pg_tprocc_py.sh"
+docker exec -it exjobb-hammerdb bash -c "./pg_tprocc_py_${INDEX_SETTING}.sh"
