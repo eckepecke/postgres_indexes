@@ -1,7 +1,7 @@
 export TMP=`pwd`/TMP
 mkdir -p $TMP
 
-INDEX_SETTING="TPCC_STANDARD"
+INDEX_SETTING="ADD_READ_HEAVY"
 TIMESTAMP=$(TZ="Europe/Stockholm" date +"%Y%m%d_%H%M%S")
 RUN_DIR="${RESULTS_DIR}/TPCC/${INDEX_SETTING}/${TIMESTAMP}"
 PG_METRICS_DIR="${RUN_DIR}/postgres_metrics"
@@ -11,18 +11,33 @@ echo "BUILD HAMMERDB SCHEMA WITH ${INDEX_SETTING}"
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 ./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_buildschema.py
 
+echo "DROP NON-PK MULTI-COLUMN INDEXES"
+echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 # 2. Drop non-PK multi-column indexes
-echo "BUILD FINISHED"
+echo "DROP NON-PK MULTI-COLUMN INDEXES"
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 PGPASSWORD="tpcc" psql -h postgres -U tpcc -d tpcc <<EOF
 
 
-SHOW enable_indexscan;
-SHOW enable_bitmapscan;
-SHOW enable_seqscan;
+-- 1. Create Additional B-tree indexes
+\echo '=== Adding more multi-column Indexes ==='
 
+CREATE INDEX orders_customer_recent_idx 
+ON orders (o_w_id, o_d_id, o_c_id, o_id DESC);
+-- Update query planner info
 
--- 4. Verify index state
+-- Partial index for low stock (avoids scanning all rows)
+-- CREATE INDEX stock_low_quantity_partial_idx 
+-- ON stock (s_w_id) 
+-- WHERE s_quantity < <threshold>;  -- e.g., 50
+
+-- Covering index for Order-Line joins
+CREATE INDEX order_line_stock_join_idx 
+ON order_line (ol_w_id, ol_d_id, ol_o_id, ol_i_id);
+
+ANALYZE VERBOSE;
+
+-- 2. Verify index state
 \echo '=== Current Indexes ==='
 SELECT 
   indexname AS name,
@@ -120,13 +135,11 @@ echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 echo "HAMMERDB RESULT"
 ./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_result.py
 
-
 # Save hammerdb result to correct folder
 cp "${RESULTS_DIR}/benchmark_results_tprocc.txt" "${RUN_DIR}/"
 
 # Compress the metrics files for easy download
-tar -czvf "${RUN_DIR}_${INDEX_SETTING}.tar.gz" -C "${RUN_DIR}/.." "$(basename "${RUN_DIR}")"
-
+tar -czvf "${RUN_DIR}.tar.gz" -C "${RESULTS_DIR}" "$(basename "${RUN_DIR}")"
 
 echo "PostgreSQL metrics saved to: ${PG_METRICS_DIR}"
-echo "Compressed metrics archive: ${RESULTS_DIR}/postgres_metrics.tar.gz"
+echo "Compressed metrics archive: ${RUN_DIR}.tar.gz"

@@ -1,68 +1,0 @@
-
-=== SAVING INDEX STATISTICS ===
-COPY 0
-COPY 0
-COPY 0
-COPY 0
-
-=== INDEX STORAGE OVERHEAD ===
- name | table | size | table_size | pct_of_table | definition 
-------+-------+------+------------+--------------+------------
-(0 rows)
-
-
-=== INDEX USAGE STATISTICS ===
- index | table | scans | tuples_read | tuples_fetched | efficiency_pct 
--------+-------+-------+-------------+----------------+----------------
-(0 rows)
-
-DROP HAMMERDB SCHEMA
-HammerDB CLI v4.12
-Copyright (C) 2003-2024 Steve Shaw
-Type "help()" for a list of commands
-exec(open('./scripts/python/postgres/tproch/pg_tproch_deleteschema.py').read())
-SETTING CONFIGURATION
-Database set to PostgreSQL
-Benchmark set to TPC-H for PostgreSQL
-Value postgres for connection:pg_host is the same as existing value postgres, no change made
-Value 5432 for connection:pg_port is the same as existing value 5432, no change made
-Value prefer for connection:pg_sslmode is the same as existing value prefer, no change made
-Value postgres for tpch:pg_tpch_superuser is the same as existing value postgres, no change made
-Value postgres for tpch:pg_tpch_superuserpass is the same as existing value postgres, no change made
-Value postgres for tpch:pg_tpch_defaultdbase is the same as existing value postgres, no change made
-Value tpch for tpch:pg_tpch_user is the same as existing value tpch, no change made
-Value tpch for tpch:pg_tpch_pass is the same as existing value tpch, no change made
-Value tpch for tpch:pg_tpch_dbase is the same as existing value tpch, no change made
-Value pg_default for tpch:pg_tpch_tspace is the same as existing value pg_default, no change made
-DROP SCHEMA STARTED
-Script cleared
-Deleting schema with 1 Virtual User
-Do you want to delete the TPCH TPROC-H schema and role TPCH
- in host POSTGRES:5432 under user POSTGRES?
-Enter yes or no: replied yes
-Vuser 1 created - WAIT IDLE
-Vuser 1:RUNNING
-Vuser 1:tpch TPROC-H schema has been deleted successfully.
-Vuser 1:tpch TPROC-H role has been deleted successfully.
-Vuser 1:FINISHED SUCCESS
-ALL VIRTUAL USERS COMPLETE
-TPROC-H Driver Script
-DROP SCHEMA COMPLETED
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
-HAMMERDB RESULT
-HammerDB CLI v4.12
-Copyright (C) 2003-2024 Steve Shaw
-Type "help()" for a list of commands
-exec(open('./scripts/python/postgres/tproch/pg_tproch_result.py').read())
-20250403_172115/
-20250403_172115/full_report_tpch.txt
-tar: 20250403_172115/full_report_tpch.txt: file changed as we read it
-20250403_172115/benchmark_results_tproch.txt
-20250403_172115/postgres_metrics/
-20250403_172115/postgres_metrics/index_storage_overview_tpch.csv
-20250403_172115/postgres_metrics/index_usage_statistics_tpch.csv
-20250403_172115/postgres_metrics/postgres_settings_tpch.txt
-20250403_172115/postgres_metrics/index_storage_tpch.csv
-20250403_172115/postgres_metrics/index_usage_tpch.csv
-PostgreSQL metrics saved to: /home/HammerDB-4.12/hammerdb_results/TPCH/DROP/20250403_172115/postgres_metrics
-Compressed metrics archive: /home/HammerDB-4.12/hammerdb_results/TPCH/DROP/20250403_172115.tar.gz

@@ -3,7 +3,7 @@ mkdir -p $TMP
 
 INDEX_SETTING="MORE_MULTI_COLUMN"
 TIMESTAMP=$(TZ="Europe/Stockholm" date +"%Y%m%d_%H%M%S")
-RUN_DIR="${RESULTS_DIR}/${INDEX_SETTING}/${TIMESTAMP}"
+RUN_DIR="${RESULTS_DIR}/TPCC/${INDEX_SETTING}/${TIMESTAMP}"
 PG_METRICS_DIR="${RUN_DIR}/postgres_metrics"
 mkdir -p ${PG_METRICS_DIR}
 
@@ -19,25 +19,29 @@ echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 PGPASSWORD="tpcc" psql -h postgres -U tpcc -d tpcc <<EOF
 
 
--- 2. Create HASH indexes (only on suitable columns)
+-- 1. Create Additional B-tree indexes
 \echo '=== Adding more multi-column Indexes ==='
 
-
--- For Payment Transaction:
-CREATE INDEX customer_c_last_idx ON customer USING btree (c_w_id, c_d_id, c_last, c_first);
-
--- For Delivery Transaction:
-CREATE INDEX new_order_combo_idx ON new_order USING btree (no_w_id, no_d_id, no_o_id);
-
--- For Stock-Level Transaction:
-CREATE INDEX stock_level_idx ON stock USING btree (s_w_id, s_quantity);
-
-SHOW enable_indexscan;
-SHOW enable_bitmapscan;
-SHOW enable_seqscan;
+-- Optimizes Order-Status transaction (retrieving latest order by customer)
+CREATE INDEX orders_o_w_id_o_d_id_o_c_id_o_id_desc_idx 
+ON orders (o_w_id, o_d_id, o_c_id, o_id DESC);
 
 
--- 4. Verify index state
+-- Improves joins for Stock-Level (linking Order-Line to Stock via item ID)
+CREATE INDEX order_line_ol_w_id_ol_d_id_ol_o_id_ol_i_id_idx 
+ON order_line (ol_w_id, ol_d_id, ol_o_id, ol_i_id);
+
+
+-- 1. Create Additional B-tree indexes
+\echo '=== Drop the indexes that are replaced ==='
+
+DROP INDEX IF EXISTS customer_i2;
+DROP INDEX IF EXISTS orders_i2;
+
+-- Update query planner info
+ANALYZE VERBOSE;
+
+-- 2. Verify index state
 \echo '=== Current Indexes ==='
 SELECT 
   indexname AS name,
@@ -129,9 +133,9 @@ WHERE pg_stat_user_indexes.schemaname = 'public'
 ORDER BY idx_scan DESC;
 EOF
 
-echo "DROP HAMMERDB SCHEMA"
-./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_deleteschema.py
-echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
+# echo "DROP HAMMERDB SCHEMA"
+# ./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_deleteschema.py
+# echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 echo "HAMMERDB RESULT"
 ./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_result.py
 

@@ -29,7 +29,7 @@ diset('tpcc','pg_rampup','2')
 diset('tpcc','pg_duration','1') # Duration
 diset('tpcc','pg_allwarehouse','false')
 diset('tpcc','pg_timeprofile','true')
-# diset('tpcc','pg_vacuum','true')
+diset('tpcc','pg_vacuum','true')
 
 # Load TPC-H script and inject planner flags
 loadscript()

@@ -1,102 +1,0 @@
-
-=== SAVING INDEX STATISTICS ===
-COPY 0
-COPY 0
-COPY 0
-COPY 0
-
-=== INDEX STORAGE OVERHEAD ===
- name | table | size | table_size | pct_of_table | definition 
-------+-------+------+------------+--------------+------------
-(0 rows)
-
-
-=== DATABASE SETTINGS ===
- enable_indexscan 
-------------------
- on
-(1 row)
-
- enable_bitmapscan 
--------------------
- on
-(1 row)
-
- enable_seqscan 
-----------------
- on
-(1 row)
-
- work_mem 
-----------
- 4MB
-(1 row)
-
- maintenance_work_mem 
-----------------------
- 64MB
-(1 row)
-
- random_page_cost 
-------------------
- 4
-(1 row)
-
- effective_cache_size 
-----------------------
- 4GB
-(1 row)
-
-
-=== INDEX USAGE STATISTICS ===
- index | table | scans | tuples_read | tuples_fetched | efficiency_pct 
--------+-------+-------+-------------+----------------+----------------
-(0 rows)
-
-DROP HAMMERDB SCHEMA
-HammerDB CLI v4.12
-Copyright (C) 2003-2024 Steve Shaw
-Type "help()" for a list of commands
-exec(open('./scripts/python/postgres/tprocc/pg_tprocc_deleteschema.py').read())
-SETTING CONFIGURATION
-Database set to PostgreSQL
-Benchmark set to TPC-C for PostgreSQL
-Value postgres for connection:pg_host is the same as existing value postgres, no change made
-Value 5432 for connection:pg_port is the same as existing value 5432, no change made
-Value prefer for connection:pg_sslmode is the same as existing value prefer, no change made
-Value postgres for tpcc:pg_superuser is the same as existing value postgres, no change made
-Value postgres for tpcc:pg_superuserpass is the same as existing value postgres, no change made
-Value postgres for tpcc:pg_defaultdbase is the same as existing value postgres, no change made
-Value tpcc for tpcc:pg_user is the same as existing value tpcc, no change made
-Value tpcc for tpcc:pg_pass is the same as existing value tpcc, no change made
-Value tpcc for tpcc:pg_dbase is the same as existing value tpcc, no change made
-DROP SCHEMA STARTED
-Script cleared
-Deleting schema with 1 Virtual User
-Do you want to delete the TPCC TPROC-C schema and role TPCC
- in host POSTGRES:5432 under user POSTGRES?
-Enter yes or no: replied yes
-Vuser 1 created - WAIT IDLE
-Vuser 1:RUNNING
-Vuser 1:tpcc TPROC-C schema has been deleted successfully.
-Vuser 1:tpcc TPROC-C role has been deleted successfully.
-Vuser 1:FINISHED SUCCESS
-ALL VIRTUAL USERS COMPLETE
-DROP SCHEMA COMPLETED
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
-HAMMERDB RESULT
-HammerDB CLI v4.12
-Copyright (C) 2003-2024 Steve Shaw
-Type "help()" for a list of commands
-exec(open('./scripts/python/postgres/tprocc/pg_tprocc_result.py').read())
-20250403_155942/
-20250403_155942/benchmark_results_tprocc.txt
-20250403_155942/full_report_tpcc.txt
-20250403_155942/postgres_metrics/
-20250403_155942/postgres_metrics/index_usage_tpcc.csv
-20250403_155942/postgres_metrics/index_storage_tpcc.csv
-20250403_155942/postgres_metrics/index_storage_overview_tpcc.csv
-20250403_155942/postgres_metrics/postgres_settings_tpcc.txt
-20250403_155942/postgres_metrics/index_usage_statistics_tpcc.csv
-PostgreSQL metrics saved to: /home/HammerDB-4.12/hammerdb_results/DROP/20250403_155942/postgres_metrics
-Compressed metrics archive: /home/HammerDB-4.12/hammerdb_results/DROP/20250403_155942.tar.gz

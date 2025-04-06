@@ -1,0 +1,116 @@
+
+=== SAVING INDEX STATISTICS ===
+COPY 9
+COPY 9
+COPY 9
+COPY 9
+
+=== INDEX STORAGE OVERHEAD ===
+            name            |   table    |    size    | table_size | pct_of_table |                                                definition                                                 
+----------------------------+------------+------------+------------+--------------+-----------------------------------------------------------------------------------------------------------
+ item_i1                    | item       | 888 kB     | 5264 kB    |        16.87 | CREATE UNIQUE INDEX item_i1 ON public.item USING btree (i_id)
+ stock_i1                   | stock      | 280 kB     | 3792 kB    |         7.38 | CREATE UNIQUE INDEX stock_i1 ON public.stock USING btree (s_i_id, s_w_id)
+ warehouse_i1               | warehouse  | 16 kB      | 24 kB      |        66.67 | CREATE UNIQUE INDEX warehouse_i1 ON public.warehouse USING btree (w_id)
+ orders_i1                  | orders     | 8192 bytes | 16 kB      |        50.00 | CREATE UNIQUE INDEX orders_i1 ON public.orders USING btree (o_w_id, o_d_id, o_id)
+ order_line_i1              | order_line | 8192 bytes | 8192 bytes |       100.00 | CREATE UNIQUE INDEX order_line_i1 ON public.order_line USING btree (ol_w_id, ol_d_id, ol_o_id, ol_number)
+ customer_i1                | customer   | 8192 bytes | 16 kB      |        50.00 | CREATE UNIQUE INDEX customer_i1 ON public.customer USING btree (c_w_id, c_d_id, c_id)
+ orders_customer_recent_idx | orders     | 8192 bytes | 16 kB      |        50.00 | CREATE INDEX orders_customer_recent_idx ON public.orders USING btree (o_w_id, o_d_id, o_c_id, o_id DESC)
+ district_i1                | district   | 8192 bytes | 8192 bytes |       100.00 | CREATE UNIQUE INDEX district_i1 ON public.district USING btree (d_w_id, d_id)
+ new_order_i1               | new_order  | 8192 bytes | 8192 bytes |       100.00 | CREATE UNIQUE INDEX new_order_i1 ON public.new_order USING btree (no_w_id, no_d_id, no_o_id)
+(9 rows)
+
+
+=== DATABASE SETTINGS ===
+ enable_indexscan 
+------------------
+ on
+(1 row)
+
+ enable_bitmapscan 
+-------------------
+ on
+(1 row)
+
+ enable_seqscan 
+----------------
+ on
+(1 row)
+
+ work_mem 
+----------
+ 4MB
+(1 row)
+
+ maintenance_work_mem 
+----------------------
+ 64MB
+(1 row)
+
+ random_page_cost 
+------------------
+ 4
+(1 row)
+
+ effective_cache_size 
+----------------------
+ 4GB
+(1 row)
+
+
+=== INDEX USAGE STATISTICS ===
+           index            |   table    | scans | tuples_read | tuples_fetched | efficiency_pct 
+----------------------------+------------+-------+-------------+----------------+----------------
+ warehouse_i1               | warehouse  |     1 |           1 |              1 |         100.00
+ district_i1                | district   |     0 |           0 |              0 |               
+ item_i1                    | item       |     0 |           0 |              0 |               
+ stock_i1                   | stock      |     0 |           0 |              0 |               
+ new_order_i1               | new_order  |     0 |           0 |              0 |               
+ orders_i1                  | orders     |     0 |           0 |              0 |               
+ order_line_i1              | order_line |     0 |           0 |              0 |               
+ customer_i1                | customer   |     0 |           0 |              0 |               
+ orders_customer_recent_idx | orders     |     0 |           0 |              0 |               
+(9 rows)
+
+DROP HAMMERDB SCHEMA
+HammerDB CLI v4.12
+Copyright (C) 2003-2024 Steve Shaw
+Type "help()" for a list of commands
+exec(open('./scripts/python/postgres/tprocc/pg_tprocc_deleteschema.py').read())
+SETTING CONFIGURATION
+Database set to PostgreSQL
+Benchmark set to TPC-C for PostgreSQL
+Value postgres for connection:pg_host is the same as existing value postgres, no change made
+Value 5432 for connection:pg_port is the same as existing value 5432, no change made
+Value prefer for connection:pg_sslmode is the same as existing value prefer, no change made
+Value postgres for tpcc:pg_superuser is the same as existing value postgres, no change made
+Value postgres for tpcc:pg_superuserpass is the same as existing value postgres, no change made
+Value postgres for tpcc:pg_defaultdbase is the same as existing value postgres, no change made
+Value tpcc for tpcc:pg_user is the same as existing value tpcc, no change made
+Value tpcc for tpcc:pg_pass is the same as existing value tpcc, no change made
+Value tpcc for tpcc:pg_dbase is the same as existing value tpcc, no change made
+DROP SCHEMA STARTED
+Script cleared
+Deleting schema with 1 Virtual User
+Do you want to delete the TPCC TPROC-C schema and role TPCC
+ in host POSTGRES:5432 under user POSTGRES?
+Enter yes or no: replied yes
+Vuser 1 created - WAIT IDLE
+Vuser 1:RUNNING
+Vuser 1:tpcc TPROC-C schema has been deleted successfully.
+Vuser 1:tpcc TPROC-C role has been deleted successfully.
+Vuser 1:FINISHED SUCCESS
+ALL VIRTUAL USERS COMPLETE
+DROP SCHEMA COMPLETED
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+HAMMERDB RESULT
+HammerDB CLI v4.12
+Copyright (C) 2003-2024 Steve Shaw
+Type "help()" for a list of commands
+exec(open('./scripts/python/postgres/tprocc/pg_tprocc_result.py').read())
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "<string>", line 19, in <module>
+  File "<string>", line 56, in <module>
+  File "<string>", line 41, in getjobid
+FileNotFoundError: [Errno 2] No such file or directory: '/home/HammerDB-4.12/TMP/pg_tprocc'
+hammerdb>>>
