@@ -36,6 +36,7 @@ ON district (d_w_id, d_id, d_ytd);
 
 CREATE INDEX warehouse_w_id_w_ytd_idx 
 ON warehouse (w_id, w_ytd);
+
 ANALYZE VERBOSE;
 
 -- 2. Verify index state

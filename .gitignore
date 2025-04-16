@@ -1,4 +1,4 @@
-data/
+hammerdb_results/
 *.csv
 *.json
 *.log

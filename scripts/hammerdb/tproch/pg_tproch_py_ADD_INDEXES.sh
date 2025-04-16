@@ -1,7 +1,7 @@
 export TMP=`pwd`/TMP
 mkdir -p $TMP
 
-INDEX_SETTING="MORE_MULTI_COLUMN"
+INDEX_SETTING="ADD_INDEXES"
 TIMESTAMP=$(TZ="Europe/Stockholm" date +"%Y%m%d_%H%M%S")
 RUN_DIR="${RESULTS_DIR}/TPCH/${INDEX_SETTING}/${TIMESTAMP}"
 PG_METRICS_DIR="${RUN_DIR}/postgres_metrics"
@@ -10,6 +10,7 @@ mkdir -p ${PG_METRICS_DIR}
 echo "BUILD HAMMERDB SCHEMA WITH MINIMAL MULTI-COLOMN INDEXES"
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 ./hammerdbcli py auto ./scripts/python/postgres/tproch/pg_tproch_buildschema.py
+echo "BUILD FINISHED"
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 echo "CHECK HAMMERDB SCHEMA"
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
@@ -18,7 +19,7 @@ echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 
 PGPASSWORD="tpch" psql -h postgres -U tpch -d tpch <<EOF
 
--- 2. Verify index state
+-- 1. Verify index state
 \echo '=== Current Indexes ==='
 SELECT
     tablename AS table_name,
@@ -29,33 +30,26 @@ FROM pg_indexes
 WHERE schemaname = 'public'
 ORDER BY column_count DESC, table_name, index_name;
 
--- 1. LineItem: Speeds up date-range filters
--- on shipping dates (e.g., reporting/analytics by shipment window).
-CREATE INDEX lineitem_shipdate_idx ON lineitem (l_shipdate);  -- Date-range queries
+CREATE INDEX lineitem_shipdate_orderkey_idx 
+ON lineitem (l_shipdate, l_orderkey);
 
--- 2. Orders: Optimizes time-based order analysis
--- and customer-centric queries (e.g., orders per customer in a date range).
-CREATE INDEX orders_orderdate_custkey_idx ON orders (o_orderdate, o_custkey);  -- Time-based analysis
-
--- 3. LineItem: Accelerates joins with Orders/Partsupp and filters on
--- orderkey, partkey, or suppkey (common in TPCH joins).
-CREATE INDEX lineitem_cover_idx ON lineitem (l_orderkey, l_partkey, l_suppkey);  
-
--- 4. Orders: Optimizes time-based queries (order date) and customer joins (custkey).  
-CREATE INDEX orders_orderdate_custkey_idx
+CREATE INDEX orders_orderdate_custkey_idx 
 ON orders (o_orderdate, o_custkey);
 
--- 5. Part: Streamlines part categorization queries (brand, type, size).  
-CREATE INDEX part_brand_type_size_idx
+CREATE INDEX customer_nationkey_mktsegment_idx 
+ON customer (c_nationkey, c_mktsegment);
+
+CREATE INDEX part_brand_type_size_idx 
 ON part (p_brand, p_type, p_size);
 
--- 6. PartSupp: Enables fast stock availability checks via index-only scans (avoids table lookups). 
-CREATE INDEX partsupp_partkey_suppkey_availqty_idx
+CREATE INDEX partsupp_partkey_suppkey_availqty_idx 
 ON partsupp (ps_partkey, ps_suppkey) INCLUDE (ps_availqty);
 
--- 7. Supplier: Improves filtering by nation and sorting/analyzing supplier financials (account balance). 
-CREATE INDEX supplier_nationkey_acctbal_idx
+CREATE INDEX supplier_nationkey_acctbal_idx 
 ON supplier (s_nationkey, s_acctbal);
+
+-- Update query planner info
+-- ANALYZE VERBOSE;
 
 \echo '=== Current Indexes ==='
 SELECT 

@@ -10,34 +10,29 @@ mkdir -p ${PG_METRICS_DIR}
 echo "BUILD HAMMERDB SCHEMA WITH ${INDEX_SETTING}"
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 ./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_buildschema.py
-
-echo "DROP NON-PK MULTI-COLUMN INDEXES"
+echo "BUILD FINISHED"
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-# 2. Drop non-PK multi-column indexes
-echo "DROP NON-PK MULTI-COLUMN INDEXES"
+echo "ADD MULTI-COLUMN INDEXES ON READ HEAVY COLUMNS"
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 PGPASSWORD="tpcc" psql -h postgres -U tpcc -d tpcc <<EOF
 
-
 -- 1. Create Additional B-tree indexes
-\echo '=== Adding more multi-column Indexes ==='
+\echo '=== Adding Multi-Column Indexes on Read Heavy Columns==='
 
+-- Optimizes queries for retrieving the most recent order of a customer,
+-- ordered by order_id descending, which is common in the "order status" transaction
 CREATE INDEX orders_customer_recent_idx 
 ON orders (o_w_id, o_d_id, o_c_id, o_id DESC);
--- Update query planner info
 
--- Partial index for low stock (avoids scanning all rows)
--- CREATE INDEX stock_low_quantity_partial_idx 
--- ON stock (s_w_id) 
--- WHERE s_quantity < <threshold>;  -- e.g., 50
-
--- Covering index for Order-Line joins
+-- Covering index for joining order_line and stock tables in delivery and order status transactions,
+-- which filter on warehouse/district/order and join on item_id
 CREATE INDEX order_line_stock_join_idx 
 ON order_line (ol_w_id, ol_d_id, ol_o_id, ol_i_id);
 
+-- 2. Update query planner info
 ANALYZE VERBOSE;
 
--- 2. Verify index state
+-- 3. Verify index state
 \echo '=== Current Indexes ==='
 SELECT 
   indexname AS name,
@@ -48,15 +43,12 @@ WHERE schemaname = 'public'
 ORDER BY tablename, indexname;
 EOF
 
-
 echo "CHECK HAMMERDB SCHEMA"
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 ./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_checkschema.py
-
 echo "RUN HAMMERDB TEST"
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 ./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_run.py
-
 echo "CAPTURE INDEX METRICS"
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 

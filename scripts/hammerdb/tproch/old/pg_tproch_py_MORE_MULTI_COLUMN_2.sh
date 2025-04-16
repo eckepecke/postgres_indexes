@@ -1,47 +1,31 @@
 export TMP=`pwd`/TMP
 mkdir -p $TMP
 
-INDEX_SETTING="MORE_MULTI_COLUMN"
+INDEX_SETTING="MORE_MULTI_COLUMN_2"
 TIMESTAMP=$(TZ="Europe/Stockholm" date +"%Y%m%d_%H%M%S")
-RUN_DIR="${RESULTS_DIR}/TPCC/${INDEX_SETTING}/${TIMESTAMP}"
+RUN_DIR="${RESULTS_DIR}/TPCH/${INDEX_SETTING}/${TIMESTAMP}"
 PG_METRICS_DIR="${RUN_DIR}/postgres_metrics"
 mkdir -p ${PG_METRICS_DIR}
 
-echo "BUILD HAMMERDB SCHEMA WITH ${INDEX_SETTING}"
+echo "BUILD HAMMERDB SCHEMA WITH MINIMAL MULTI-COLOMN INDEXES"
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_buildschema.py
-
-echo "DROP NON-PK MULTI-COLUMN INDEXES"
+./hammerdbcli py auto ./scripts/python/postgres/tproch/pg_tproch_buildschema.py
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-# 2. Drop non-PK multi-column indexes
-echo "DROP NON-PK MULTI-COLUMN INDEXES"
+echo "CHECK HAMMERDB SCHEMA"
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-PGPASSWORD="tpcc" psql -h postgres -U tpcc -d tpcc <<EOF
+./hammerdbcli py auto ./scripts/python/postgres/tproch/pg_tproch_checkschema.py
+echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 
+PGPASSWORD="tpch" psql -h postgres -U tpch -d tpch <<EOF
+-- The first 2 did not do so well
+-- CREATE INDEX lineitem_shipdate_idx ON lineitem (l_shipdate);  -- Date-range queries
+-- CREATE INDEX orders_orderdate_custkey_idx ON orders (o_orderdate, o_custkey);  -- Time-based analysis
 
--- 1. Create Additional B-tree indexes
-\echo '=== Adding more multi-column Indexes ==='
-
--- Optimizes Order-Status transaction (retrieving latest order by customer)
-CREATE INDEX orders_o_w_id_o_d_id_o_c_id_o_id_desc_idx 
-ON orders (o_w_id, o_d_id, o_c_id, o_id DESC);
-
-
--- Improves joins for Stock-Level (linking Order-Line to Stock via item ID)
-CREATE INDEX order_line_ol_w_id_ol_d_id_ol_o_id_ol_i_id_idx 
-ON order_line (ol_w_id, ol_d_id, ol_o_id, ol_i_id);
-
-
--- 1. Create Additional B-tree indexes
-\echo '=== Drop the indexes that are replaced ==='
-
-DROP INDEX IF EXISTS customer_i2;
-DROP INDEX IF EXISTS orders_i2;
+CREATE INDEX lineitem_cover_idx ON lineitem (l_orderkey, l_partkey, l_suppkey);  
 
 -- Update query planner info
-ANALYZE VERBOSE;
+-- ANALYZE VERBOSE;
 
--- 2. Verify index state
 \echo '=== Current Indexes ==='
 SELECT 
   indexname AS name,
@@ -50,32 +34,39 @@ SELECT
 FROM pg_indexes
 WHERE schemaname = 'public'
 ORDER BY tablename, indexname;
+
+-- 2. Verify index state
+\echo '=== Current Indexes ==='
+SELECT
+    tablename AS table_name,
+    indexname AS index_name,
+    array_length(regexp_split_to_array(indexdef, ', '), 1) AS column_count,
+    indexdef AS index_definition
+FROM pg_indexes
+WHERE schemaname = 'public'
+ORDER BY column_count DESC, table_name, index_name;
 EOF
-
-
-echo "CHECK HAMMERDB SCHEMA"
-echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_checkschema.py
 
 echo "RUN HAMMERDB TEST"
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
-./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_run.py
+./hammerdbcli py auto ./scripts/python/postgres/tproch/pg_tproch_run.py
+echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 
 echo "CAPTURE INDEX METRICS"
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 
-# Define output files
-INDEX_STORAGE_DETAILS="${PG_METRICS_DIR}/index_storage_tpcc.csv"
-INDEX_USAGE_DETAILS="${PG_METRICS_DIR}/index_usage_tpcc.csv"
-STORAGE_OVERVIEW="${PG_METRICS_DIR}/index_storage_overview_tpcc.csv"
-USAGE_STATISTICS="${PG_METRICS_DIR}/index_usage_statistics_tpcc.csv"
-PG_SETTINGS="${PG_METRICS_DIR}/postgres_settings_tpcc.txt"
-FULL_REPORT="${PG_METRICS_DIR}/full_report_tpcc.txt"
+# Define output files relative to the run directory
+INDEX_STORAGE_DETAILS="${PG_METRICS_DIR}/index_storage_tpch.csv"
+INDEX_USAGE_DETAILS="${PG_METRICS_DIR}/index_usage_tpch.csv"
+STORAGE_OVERVIEW="${PG_METRICS_DIR}/index_storage_overview_tpch.csv"
+USAGE_STATISTICS="${PG_METRICS_DIR}/index_usage_statistics_tpch.csv"
+PG_SETTINGS="${PG_METRICS_DIR}/postgres_settings_tpch.txt"
+FULL_REPORT="${RUN_DIR}/full_report_tpch.txt"
 
-# Capture all output to a full report file
+# Capture all output to the full report in the run directory
 exec > >(tee "${FULL_REPORT}") 2>&1
 
-PGPASSWORD="tpcc" psql -h postgres -U tpcc -d tpcc <<EOF
+PGPASSWORD="tpch" psql -h postgres -U tpch -d tpch <<EOF
 -- Save detailed metrics to CSV files
 \echo '\n=== SAVING INDEX STATISTICS ==='
 
@@ -110,15 +101,6 @@ FROM pg_indexes
 WHERE schemaname = 'public'
 ORDER BY pg_relation_size(indexname::regclass) DESC;
 
-\echo '\n=== DATABASE SETTINGS ==='
-SHOW enable_indexscan;
-SHOW enable_bitmapscan;
-SHOW enable_seqscan;
-SHOW work_mem;
-SHOW maintenance_work_mem;
-SHOW random_page_cost;
-SHOW effective_cache_size;
-
 \echo '\n=== INDEX USAGE STATISTICS ==='
 SELECT
   indexrelname AS index,
@@ -133,17 +115,17 @@ WHERE pg_stat_user_indexes.schemaname = 'public'
 ORDER BY idx_scan DESC;
 EOF
 
-# echo "DROP HAMMERDB SCHEMA"
-# ./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_deleteschema.py
-# echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
+echo "DROP HAMMERDB SCHEMA"
+./hammerdbcli py auto ./scripts/python/postgres/tproch/pg_tproch_deleteschema.py
+echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 echo "HAMMERDB RESULT"
-./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_result.py
+./hammerdbcli py auto ./scripts/python/postgres/tproch/pg_tproch_result.py
 
 # Save hammerdb result to correct folder
-cp "${RESULTS_DIR}/benchmark_results_tprocc.txt" "${RUN_DIR}/"
+cp "${RESULTS_DIR}/benchmark_results_tproch.txt" "${RUN_DIR}/"
 
-# Compress the metrics files for easy download
-tar -czvf "${RUN_DIR}.tar.gz" -C "${RESULTS_DIR}" "$(basename "${RUN_DIR}")"
+# Compress the entire run directory for easy download
+tar -czvf "${RUN_DIR}_${INDEX_SETTING}.tar.gz" -C "${RUN_DIR}/.." "$(basename "${RUN_DIR}")"
 
 echo "PostgreSQL metrics saved to: ${PG_METRICS_DIR}"
 echo "Compressed metrics archive: ${RUN_DIR}.tar.gz"

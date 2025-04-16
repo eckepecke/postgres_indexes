@@ -16,6 +16,12 @@ COPY ./scripts/hammerdb/tprocc/pg_tprocc_py_ADD_WRITE_HEAVY.sh /home/HammerDB-4.
 
 
 COPY ./scripts/hammerdb/tproch/pg_tproch_py_TPCH_STANDARD.sh /home/HammerDB-4.12/
-COPY ./scripts/hammerdb/tproch/pg_tproch_py_MORE_MULTI_COLUMN.sh /home/HammerDB-4.12/
+#COPY ./scripts/hammerdb/tproch/pg_tproch_py_MORE_MULTI_COLUMN.sh /home/HammerDB-4.12/
 COPY ./scripts/hammerdb/tproch/pg_tproch_py_MORE_MULTI_COLUMN_2.sh /home/HammerDB-4.12/
+COPY ./scripts/hammerdb/tproch/pg_tproch_py_ALL_MULTI_COLUMN_2.sh /home/HammerDB-4.12/
+
+COPY ./scripts/hammerdb/tproch/pg_tproch_py_OPTIMIZED.sh /home/HammerDB-4.12/
+COPY ./scripts/hammerdb/tproch/pg_tproch_py_OPTIMIZED.sh /home/HammerDB-4.12/
+
+
 

@@ -1,125 +1,0 @@
-
-=== SAVING INDEX STATISTICS ===
-COPY 15
-COPY 15
-COPY 15
-COPY 15
-
-=== INDEX STORAGE OVERHEAD ===
-                       name                       |   table    |  size   | table_size | pct_of_table |                                                              definition                                                               
---------------------------------------------------+------------+---------+------------+--------------+---------------------------------------------------------------------------------------------------------------------------------------
- order_line_i1                                    | order_line | 227 MB  | 1127 MB    |        20.17 | CREATE UNIQUE INDEX order_line_i1 ON public.order_line USING btree (ol_w_id, ol_d_id, ol_o_id, ol_number)
- order_line_ol_w_id_ol_d_id_ol_o_id_ol_number_idx | order_line | 227 MB  | 1127 MB    |        20.13 | CREATE INDEX order_line_ol_w_id_ol_d_id_ol_o_id_ol_number_idx ON public.order_line USING btree (ol_w_id, ol_d_id, ol_o_id, ol_number)
- stock_s_w_id_s_i_id_s_quantity_idx               | stock      | 89 MB   | 832 MB     |        10.67 | CREATE INDEX stock_s_w_id_s_i_id_s_quantity_idx ON public.stock USING btree (s_w_id, s_i_id, s_quantity)
- stock_i1                                         | stock      | 60 MB   | 832 MB     |         7.21 | CREATE UNIQUE INDEX stock_i1 ON public.stock USING btree (s_i_id, s_w_id)
- customer_i2                                      | customer   | 43 MB   | 467 MB     |         9.24 | CREATE UNIQUE INDEX customer_i2 ON public.customer USING btree (c_w_id, c_d_id, c_last, c_first, c_id)
- customer_c_w_id_c_d_id_c_id_c_balance_idx        | customer   | 30 MB   | 467 MB     |         6.47 | CREATE INDEX customer_c_w_id_c_d_id_c_id_c_balance_idx ON public.customer USING btree (c_w_id, c_d_id, c_id, c_balance)
- orders_i2                                        | orders     | 26 MB   | 91 MB      |        28.10 | CREATE UNIQUE INDEX orders_i2 ON public.orders USING btree (o_w_id, o_d_id, o_c_id, o_id)
- customer_i1                                      | customer   | 23 MB   | 467 MB     |         4.93 | CREATE UNIQUE INDEX customer_i1 ON public.customer USING btree (c_w_id, c_d_id, c_id)
- orders_i1                                        | orders     | 23 MB   | 91 MB      |        25.11 | CREATE UNIQUE INDEX orders_i1 ON public.orders USING btree (o_w_id, o_d_id, o_id)
- new_order_i1                                     | new_order  | 8280 kB | 19 MB      |        43.31 | CREATE UNIQUE INDEX new_order_i1 ON public.new_order USING btree (no_w_id, no_d_id, no_o_id)
- warehouse_w_id_w_ytd_idx                         | warehouse  | 2312 kB | 4240 kB    |        54.53 | CREATE INDEX warehouse_w_id_w_ytd_idx ON public.warehouse USING btree (w_id, w_ytd)
- item_i1                                          | item       | 2208 kB | 12 MB      |        17.34 | CREATE UNIQUE INDEX item_i1 ON public.item USING btree (i_id)
- district_d_w_id_d_id_d_ytd_idx                   | district   | 216 kB  | 3304 kB    |         6.54 | CREATE INDEX district_d_w_id_d_id_d_ytd_idx ON public.district USING btree (d_w_id, d_id, d_ytd)
- district_i1                                      | district   | 56 kB   | 3304 kB    |         1.69 | CREATE UNIQUE INDEX district_i1 ON public.district USING btree (d_w_id, d_id)
- warehouse_i1                                     | warehouse  | 48 kB   | 4240 kB    |         1.13 | CREATE UNIQUE INDEX warehouse_i1 ON public.warehouse USING btree (w_id)
-(15 rows)
-
-
-=== DATABASE SETTINGS ===
- enable_indexscan 
-------------------
- on
-(1 row)
-
- enable_bitmapscan 
--------------------
- on
-(1 row)
-
- enable_seqscan 
-----------------
- on
-(1 row)
-
- work_mem 
-----------
- 4MB
-(1 row)
-
- maintenance_work_mem 
-----------------------
- 64MB
-(1 row)
-
- random_page_cost 
-------------------
- 4
-(1 row)
-
- effective_cache_size 
-----------------------
- 4GB
-(1 row)
-
-
-=== INDEX USAGE STATISTICS ===
-                      index                       |   table    |  scans  | tuples_read | tuples_fetched | efficiency_pct 
---------------------------------------------------+------------+---------+-------------+----------------+----------------
- stock_s_w_id_s_i_id_s_quantity_idx               | stock      | 2034530 |    34033015 |       33487874 |          98.40
- item_i1                                          | item       | 1203396 |     1202205 |        1202205 |         100.00
- customer_c_w_id_c_d_id_c_id_c_balance_idx        | customer   |  412991 |      481649 |         412991 |          85.75
- new_order_i1                                     | new_order  |  245880 |      843604 |         245307 |          29.08
- orders_i1                                        | orders     |  238720 |      260787 |         238720 |          91.54
- district_d_w_id_d_id_d_ytd_idx                   | district   |  226932 |     1452722 |         226932 |          15.62
- warehouse_i1                                     | warehouse  |  181202 |     8796864 |         136641 |           1.55
- order_line_ol_w_id_ol_d_id_ol_o_id_ol_number_idx | order_line |  133388 |     9426539 |        7220881 |          76.60
- customer_i2                                      | customer   |   86742 |           0 |              0 |               
- district_i1                                      | district   |   24733 |      123878 |              0 |           0.00
- stock_i1                                         | stock      |   22094 |       22097 |          11303 |          51.15
- orders_i2                                        | orders     |    4856 |      933064 |         655973 |          70.30
- warehouse_w_id_w_ytd_idx                         | warehouse  |     155 |       48644 |            155 |           0.32
- customer_i1                                      | customer   |       2 |      600001 |          14471 |           2.41
- order_line_i1                                    | order_line |       0 |           0 |              0 |               
-(15 rows)
-
-DROP HAMMERDB SCHEMA
-HammerDB CLI v4.12
-Copyright (C) 2003-2024 Steve Shaw
-Type "help()" for a list of commands
-exec(open('./scripts/python/postgres/tprocc/pg_tprocc_deleteschema.py').read())
-SETTING CONFIGURATION
-Database set to PostgreSQL
-Benchmark set to TPC-C for PostgreSQL
-Value postgres for connection:pg_host is the same as existing value postgres, no change made
-Value 5432 for connection:pg_port is the same as existing value 5432, no change made
-Value prefer for connection:pg_sslmode is the same as existing value prefer, no change made
-Value postgres for tpcc:pg_superuser is the same as existing value postgres, no change made
-Value postgres for tpcc:pg_superuserpass is the same as existing value postgres, no change made
-Value postgres for tpcc:pg_defaultdbase is the same as existing value postgres, no change made
-Value tpcc for tpcc:pg_user is the same as existing value tpcc, no change made
-Value tpcc for tpcc:pg_pass is the same as existing value tpcc, no change made
-Value tpcc for tpcc:pg_dbase is the same as existing value tpcc, no change made
-DROP SCHEMA STARTED
-Script cleared
-Deleting schema with 1 Virtual User
-Do you want to delete the TPCC TPROC-C schema and role TPCC
- in host POSTGRES:5432 under user POSTGRES?
-Enter yes or no: replied yes
-Vuser 1 created - WAIT IDLE
-Vuser 1:RUNNING
-Vuser 1:tpcc TPROC-C schema has been deleted successfully.
-Vuser 1:tpcc TPROC-C role has been deleted successfully.
-Vuser 1:FINISHED SUCCESS
-ALL VIRTUAL USERS COMPLETE
-DROP SCHEMA COMPLETED
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
-HAMMERDB RESULT
-HammerDB CLI v4.12
-Copyright (C) 2003-2024 Steve Shaw
-Type "help()" for a list of commands
-exec(open('./scripts/python/postgres/tprocc/pg_tprocc_result.py').read())
-tar: 20250404_142538: Cannot stat: No such file or directory
-tar: Exiting with failure status due to previous errors
-PostgreSQL metrics saved to: /home/HammerDB-4.12/hammerdb_results/ADD_READ_HEAVY/20250404_142538/postgres_metrics
-Compressed metrics archive: /home/HammerDB-4.12/hammerdb_results/ADD_READ_HEAVY/20250404_142538.tar.gz

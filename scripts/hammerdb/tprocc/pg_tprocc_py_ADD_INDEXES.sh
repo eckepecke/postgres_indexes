@@ -1,7 +1,7 @@
 export TMP=`pwd`/TMP
 mkdir -p $TMP
 
-INDEX_SETTING="TPCC_STANDARD"
+INDEX_SETTING="ADD_INDEXES"
 TIMESTAMP=$(TZ="Europe/Stockholm" date +"%Y%m%d_%H%M%S")
 RUN_DIR="${RESULTS_DIR}/TPCC/${INDEX_SETTING}/${TIMESTAMP}"
 PG_METRICS_DIR="${RUN_DIR}/postgres_metrics"
@@ -12,9 +12,43 @@ echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 ./hammerdbcli py auto ./scripts/python/postgres/tprocc/pg_tprocc_buildschema.py
 echo "BUILD FINISHED"
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
+echo "ADD MULTI-COLUMN INDEXES"
+echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 PGPASSWORD="tpcc" psql -h postgres -U tpcc -d tpcc <<EOF
 
--- Verify index state
+
+-- 1. Create Additional B-tree indexes
+\echo '=== Adding more multi-column Indexes ==='
+
+-- Helps optimize stock lookups during new order transactions,
+-- which access stock by (warehouse_id, item_id), and may filter on quantity
+CREATE INDEX stock_s_w_id_s_i_id_s_quantity_idx 
+ON stock (s_w_id, s_i_id, s_quantity);
+
+-- Supports customer lookups by primary key (w_id, d_id, c_id),
+-- and helps with balance-based filtering or ordering for payment and credit checks
+CREATE INDEX customer_c_w_id_c_d_id_c_id_c_balance_idx 
+ON customer (c_w_id, c_d_id, c_id, c_balance);
+
+-- Speeds up updates and reads to district year-to-date (d_ytd) totals,
+-- which are modified during payment transactions
+CREATE INDEX district_d_w_id_d_id_d_ytd_idx 
+ON district (d_w_id, d_id, d_ytd);
+
+-- Optimizes queries for retrieving the most recent order of a customer,
+-- ordered by order_id descending, which is common in the "order status" transaction
+CREATE INDEX orders_customer_recent_idx 
+ON orders (o_w_id, o_d_id, o_c_id, o_id DESC);
+
+-- Covering index for joining order_line and stock tables in delivery and order status transactions,
+-- which filter on warehouse/district/order and join on item_id
+CREATE INDEX order_line_stock_join_idx 
+ON order_line (ol_w_id, ol_d_id, ol_o_id, ol_i_id);
+
+-- 2. Update query planner info
+ANALYZE VERBOSE;
+
+-- 3. Verify index state
 \echo '=== Current Indexes ==='
 SELECT 
   indexname AS name,
@@ -113,7 +147,7 @@ echo "HAMMERDB RESULT"
 cp "${RESULTS_DIR}/benchmark_results_tprocc.txt" "${RUN_DIR}/"
 
 # Compress the metrics files for easy download
-tar -czvf "${RUN_DIR}_${INDEX_SETTING}.tar.gz" -C "${RUN_DIR}/.." "$(basename "${RUN_DIR}")"
+tar -czvf "${RUN_DIR}.tar.gz" -C "${RESULTS_DIR}" "$(basename "${RUN_DIR}")"
 
 echo "PostgreSQL metrics saved to: ${PG_METRICS_DIR}"
-echo "Compressed metrics archive: ${RESULTS_DIR}/postgres_metrics.tar.gz"
+echo "Compressed metrics archive: ${RUN_DIR}.tar.gz"
