@@ -35,6 +35,9 @@ SELECT
 FROM droppable_indexes
 \gexec
 
+-- 2. Update query planner info
+ANALYZE VERBOSE;
+
 -- 2. Verify index state
 \echo '=== Current Indexes ==='
 SELECT 
