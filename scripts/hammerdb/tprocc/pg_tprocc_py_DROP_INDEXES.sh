@@ -3,7 +3,7 @@ mkdir -p $TMP
 
 INDEX_SETTING="DROP_INDEXES"
 TIMESTAMP=$(TZ="Europe/Stockholm" date +"%Y%m%d_%H%M%S")
-RUN_DIR="${RESULTS_DIR}/${INDEX_SETTING}/${TIMESTAMP}"
+RUN_DIR="${RESULTS_DIR}/TPCC/${INDEX_SETTING}/${TIMESTAMP}"
 PG_METRICS_DIR="${RUN_DIR}/postgres_metrics"
 mkdir -p ${PG_METRICS_DIR}
 
@@ -58,13 +58,14 @@ echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 echo "CAPTURE INDEX METRICS"
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 
-# Define output files relative to the run directory
+# Define output files
 INDEX_STORAGE_DETAILS="${PG_METRICS_DIR}/index_storage_tpcc.csv"
 INDEX_USAGE_DETAILS="${PG_METRICS_DIR}/index_usage_tpcc.csv"
 STORAGE_OVERVIEW="${PG_METRICS_DIR}/index_storage_overview_tpcc.csv"
 USAGE_STATISTICS="${PG_METRICS_DIR}/index_usage_statistics_tpcc.csv"
 PG_SETTINGS="${PG_METRICS_DIR}/postgres_settings_tpcc.txt"
-FULL_REPORT="${RUN_DIR}/full_report_tpcc.txt"
+DB_SIZE_REPORT="${PG_METRICS_DIR}/database_size.txt"
+FULL_REPORT="${PG_METRICS_DIR}/full_report_tpcc.txt"
 
 # Capture all output to the full report in the run directory
 exec > >(tee "${FULL_REPORT}") 2>&1
@@ -73,14 +74,19 @@ PGPASSWORD="tpcc" psql -h postgres -U tpcc -d tpcc <<EOF
 -- Save detailed metrics to CSV files
 \echo '\n=== SAVING INDEX STATISTICS ==='
 
+-- Save storage overhead details to CSV
 \copy (SELECT indexname, tablename, pg_relation_size(indexname::regclass) AS size_bytes, indexdef FROM pg_indexes WHERE schemaname = 'public') TO '${INDEX_STORAGE_DETAILS}' CSV HEADER;
 
+-- Save usage details overhead summary to CSV
 \copy (SELECT indexrelname, idx_scan, idx_tup_read, idx_tup_fetch FROM pg_stat_user_indexes WHERE schemaname = 'public') TO '${INDEX_USAGE_DETAILS}' CSV HEADER;
 
+-- Save storage overhead summary to CSV
 \copy (SELECT indexname, tablename, pg_relation_size(indexname::regclass), pg_total_relation_size(tablename::regclass), ROUND(100 * pg_relation_size(indexname::regclass)::numeric / NULLIF(pg_total_relation_size(tablename::regclass), 0), 2), indexdef FROM pg_indexes WHERE schemaname = 'public' ORDER BY pg_relation_size(indexname::regclass) DESC) TO '${STORAGE_OVERVIEW}' CSV HEADER;
 
+-- Save index usage statistics to CSV
 \copy (SELECT indexrelname, pg_stat_user_indexes.schemaname, pg_stat_user_indexes.relname, pg_stat_user_indexes.idx_scan, pg_stat_user_indexes.idx_tup_read, pg_stat_user_indexes.idx_tup_fetch, ROUND(100.0 * pg_stat_user_indexes.idx_tup_fetch / NULLIF(pg_stat_user_indexes.idx_tup_read, 0), 2) FROM pg_stat_user_indexes JOIN pg_stat_user_tables ON pg_stat_user_indexes.relid = pg_stat_user_tables.relid WHERE pg_stat_user_indexes.schemaname = 'public' ORDER BY pg_stat_user_indexes.idx_scan DESC) TO '${USAGE_STATISTICS}' CSV HEADER;
 
+-- Save PostgreSQL settings
 \o ${PG_SETTINGS}
 SHOW ALL;
 \o
@@ -120,6 +126,12 @@ FROM pg_stat_user_indexes
 JOIN pg_indexes ON indexrelname = indexname
 WHERE pg_stat_user_indexes.schemaname = 'public'
 ORDER BY idx_scan DESC;
+
+\echo '\n=== DATABASE SIZE ==='
+
+-- Save database size info to CSV
+\copy (SELECT pg_database_size('tpcc') AS total_size_bytes, (SELECT SUM(pg_relation_size(indexrelid)) FROM pg_stat_user_indexes) AS index_size_total_bytes, (SELECT SUM(pg_total_relation_size(relid)) FROM pg_stat_user_tables) AS table_size_total_bytes) TO '${DB_SIZE_REPORT}' CSV HEADER;
+
 EOF
 
 echo "DROP HAMMERDB SCHEMA"
@@ -131,8 +143,8 @@ echo "HAMMERDB RESULT"
 # Save hammerdb result to correct folder
 cp "${RESULTS_DIR}/benchmark_results_tprocc.txt" "${RUN_DIR}/"
 
-# Compress the entire run directory for easy download
-tar -czvf "${RUN_DIR}_${INDEX_SETTING}.tar.gz" -C "${RUN_DIR}/.." "$(basename "${RUN_DIR}")"
+# Compress the metrics files for easy download
+tar -czvf "${RUN_DIR}.tar.gz" -C "${RESULTS_DIR}" "$(basename "${RUN_DIR}")"
 
 echo "PostgreSQL metrics saved to: ${PG_METRICS_DIR}"
 echo "Compressed metrics archive: ${RUN_DIR}.tar.gz"

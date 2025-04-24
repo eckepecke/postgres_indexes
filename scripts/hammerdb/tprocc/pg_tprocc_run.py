@@ -26,7 +26,7 @@ diset('tpcc','pg_dbase','tpcc')
 diset('tpcc','pg_driver','timed')
 diset('tpcc','pg_total_iterations','10000000')
 diset('tpcc','pg_rampup','2')
-diset('tpcc','pg_duration','1') # Duration
+diset('tpcc','pg_duration','3') # Duration
 diset('tpcc','pg_allwarehouse','false')
 diset('tpcc','pg_timeprofile','true')
 diset('tpcc','pg_vacuum','true')

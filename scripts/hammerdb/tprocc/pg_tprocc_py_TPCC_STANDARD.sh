@@ -40,6 +40,7 @@ INDEX_USAGE_DETAILS="${PG_METRICS_DIR}/index_usage_tpcc.csv"
 STORAGE_OVERVIEW="${PG_METRICS_DIR}/index_storage_overview_tpcc.csv"
 USAGE_STATISTICS="${PG_METRICS_DIR}/index_usage_statistics_tpcc.csv"
 PG_SETTINGS="${PG_METRICS_DIR}/postgres_settings_tpcc.txt"
+DB_SIZE_REPORT="${PG_METRICS_DIR}/database_size.txt"
 FULL_REPORT="${PG_METRICS_DIR}/full_report_tpcc.txt"
 
 # Capture all output to a full report file
@@ -101,6 +102,13 @@ FROM pg_stat_user_indexes
 JOIN pg_indexes ON indexrelname = indexname
 WHERE pg_stat_user_indexes.schemaname = 'public'
 ORDER BY idx_scan DESC;
+
+
+\echo '\n=== DATABASE SIZE ==='
+
+-- Save database size info to CSV
+\copy (SELECT pg_database_size('tpcc') AS total_size_bytes, (SELECT SUM(pg_relation_size(indexrelid)) FROM pg_stat_user_indexes) AS index_size_total_bytes, (SELECT SUM(pg_total_relation_size(relid)) FROM pg_stat_user_tables) AS table_size_total_bytes) TO '${DB_SIZE_REPORT}' CSV HEADER;
+
 EOF
 
 echo "DROP HAMMERDB SCHEMA"
@@ -113,7 +121,7 @@ echo "HAMMERDB RESULT"
 cp "${RESULTS_DIR}/benchmark_results_tprocc.txt" "${RUN_DIR}/"
 
 # Compress the metrics files for easy download
-tar -czvf "${RUN_DIR}_${INDEX_SETTING}.tar.gz" -C "${RUN_DIR}/.." "$(basename "${RUN_DIR}")"
+tar -czvf "${RUN_DIR}.tar.gz" -C "${RESULTS_DIR}" "$(basename "${RUN_DIR}")"
 
 echo "PostgreSQL metrics saved to: ${PG_METRICS_DIR}"
-echo "Compressed metrics archive: ${RESULTS_DIR}/postgres_metrics.tar.gz"
+echo "Compressed metrics archive: ${RUN_DIR}.tar.gz"

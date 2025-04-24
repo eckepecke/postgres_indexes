@@ -86,6 +86,7 @@ INDEX_USAGE_DETAILS="${PG_METRICS_DIR}/index_usage_tpch.csv"
 STORAGE_OVERVIEW="${PG_METRICS_DIR}/index_storage_overview_tpch.csv"
 USAGE_STATISTICS="${PG_METRICS_DIR}/index_usage_statistics_tpch.csv"
 PG_SETTINGS="${PG_METRICS_DIR}/postgres_settings_tpch.txt"
+DB_SIZE_REPORT="${PG_METRICS_DIR}/database_size.txt"
 FULL_REPORT="${RUN_DIR}/full_report_tpch.txt"
 
 # Capture all output to the full report in the run directory
@@ -138,6 +139,17 @@ FROM pg_stat_user_indexes
 JOIN pg_indexes ON indexrelname = indexname
 WHERE pg_stat_user_indexes.schemaname = 'public'
 ORDER BY idx_scan DESC;
+
+\echo '\n=== DATABASE SIZE ==='
+
+-- Save database size info to CSV
+\copy (SELECT pg_database_size('tpch') AS total_size_bytes, (SELECT SUM(pg_relation_size(indexrelid)) FROM pg_stat_user_indexes) AS index_size_total_bytes, (SELECT SUM(pg_total_relation_size(relid)) FROM pg_stat_user_tables) AS table_size_total_bytes) TO '${DB_SIZE_REPORT}' CSV HEADER;
+
+SELECT 
+  pg_size_pretty(pg_database_size('tpch')) AS "Total Database Size",
+  pg_size_pretty(SUM(pg_relation_size(indexrelid))) AS "Total Index Size",
+  pg_size_pretty(SUM(pg_total_relation_size(relid))) AS "Total Table Size"
+FROM pg_stat_user_indexes, pg_stat_user_tables;
 EOF
 
 echo "DROP HAMMERDB SCHEMA"

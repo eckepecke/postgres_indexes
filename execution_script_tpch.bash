@@ -11,7 +11,6 @@ if [ "$#" -ne 3 ]; then
 fi
 
 # Assign arguments
-# Hammer db recommends 2-4 VU per warehouse??
 HAMMERDB_VU=$1
 HAMMERDB_SCALE_FACTOR=$2
 INDEX_SETTING=$3
