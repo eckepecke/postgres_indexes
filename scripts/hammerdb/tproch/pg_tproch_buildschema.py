@@ -11,8 +11,13 @@ diset('connection','pg_port','5432')
 diset('connection','pg_sslmode','prefer')
 
 vu = int(os.getenv('HAMMERDB_VU', 4))  # Default: 4 virtual users
+sf = int(os.getenv('HAMMERDB_SCALE_FACTOR', 1))  # Default: SCALE FACTOR 1
+print('HEHHEHEHEHEHEHEH')
+print(sf)
+
+
 # vu = tclpy.eval('numberOfCPUs')
-diset('tpch','pg_scale_fact','1')
+diset('tpch','pg_scale_fact',sf)
 diset('tpch','pg_num_tpch_threads',vu)
 diset('tpch','pg_tpch_superuser','postgres')
 diset('tpch','pg_tpch_superuserpass','postgres')

@@ -102,3 +102,51 @@ plt.grid(True)
 # Show the plot
 plt.tight_layout()
 plt.show()
+
+print(tpch_std_queries.head(5))
+print(tpch_add_indexes_queries.head(5))
+print(tpch_add_useful_queries.head(5))
+
+# Merge DataFrames on QueryNumber
+merged = tpch_std_queries.merge(
+    tpch_add_indexes_queries[['QueryNumber', 'QueryTimeSeconds']],
+    on='QueryNumber',
+    suffixes=('_std', '_index')
+).merge(
+    tpch_add_useful_queries[['QueryNumber', 'QueryTimeSeconds']],
+    on='QueryNumber'
+).rename(columns={'QueryTimeSeconds': 'QueryTimeSeconds_useful'})
+
+# Calculate percentage changes relative to standard configuration
+merged['pct_change_index'] = ((merged['QueryTimeSeconds_index'] - merged['QueryTimeSeconds_std']) / merged['QueryTimeSeconds_std']) * 100
+merged['pct_change_useful'] = ((merged['QueryTimeSeconds_useful'] - merged['QueryTimeSeconds_std']) / merged['QueryTimeSeconds_std']) * 100
+
+# Sort by QueryNumber for consistent ordering
+merged = merged.sort_values('QueryNumber').reset_index(drop=True)
+
+# Prepare data for plotting
+x = np.arange(len(merged))  # Create an array for the x positions
+width = 0.35  # Width of the bars
+
+# Assign colors based on improvement (green) or degradation (red)
+colors_index = ['green' if val < 0 else 'red' for val in merged['pct_change_index']]
+colors_useful = ['green' if val < 0 else 'red' for val in merged['pct_change_useful']]
+
+# Create the plot
+plt.figure(figsize=(14, 7))
+plt.bar(x - width/2, merged['pct_change_index'], width, color=colors_index, label='Added Indexes')
+plt.bar(x + width/2, merged['pct_change_useful'], width, color=colors_useful, label='Added Useful')
+
+# Customize the plot
+plt.xlabel('Query Number')
+plt.ylabel('Percentage Change (%)')
+plt.title('Percentage Change in Query Execution Time Compared to Standard Configuration')
+plt.xticks(x, merged['QueryNumber'])  # Set x-ticks to actual query numbers
+plt.axhline(0, color='black', linewidth=0.8)  # Add a baseline at 0%
+plt.grid(True, linestyle='--', alpha=0.7)
+plt.legend()
+
+# Show the plot
+plt.tight_layout()
+plt.show()
+

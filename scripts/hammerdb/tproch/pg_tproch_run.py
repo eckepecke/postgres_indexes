@@ -3,7 +3,7 @@
 import os
 tmpdir = os.getenv('TMP')
 vu = str(os.getenv('HAMMERDB_VU', 4))  # Default: 4 virtual users
-scale_factor = str(os.getenv('SCALE_FACTOR', 1))
+scale_factor = str(os.getenv('HAMMERDB_SCALE_FACTOR', 1))
 
 print("SETTING CONFIGURATION")
 dbset('db','pg')

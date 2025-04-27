@@ -7,7 +7,7 @@ RUN_DIR="${RESULTS_DIR}/TPCH/${INDEX_SETTING}/${TIMESTAMP}"
 PG_METRICS_DIR="${RUN_DIR}/postgres_metrics"
 mkdir -p ${PG_METRICS_DIR}
 
-echo "BUILD HAMMERDB SCHEMA WITH MINIMAL MULTI-COLOMN INDEXES"
+echo "BUILD HAMMERDB SCHEMA WITH ADDITIONAL MULTI-COLOMN INDEXES"
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 ./hammerdbcli py auto ./scripts/python/postgres/tproch/pg_tproch_buildschema.py
 echo "BUILD FINISHED"
