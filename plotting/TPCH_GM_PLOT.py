@@ -1,0 +1,104 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Load the CSV into the DataFrame
+tpch_std_small = pd.read_csv('../TPCH_RESULTS/results_TPCH_TPCH_STANDARD.csv')
+tpch_add_indexes = pd.read_csv('../TPCH_RESULTS/results_TPCH_ADD_INDEXES.csv')
+tpch_add_useful = pd.read_csv('../TPCH_RESULTS/results_TPCH_ADD_USEFUL.csv')
+
+
+# Calculate the mean NOPM for each dataset
+mean_gemetric_mean = {
+    'Baseline': tpch_std_small['GeometricMean'].mean(),
+    'Added': tpch_add_indexes['GeometricMean'].mean(),
+    'Added useful': tpch_add_useful['GeometricMean'].mean(),
+}
+
+# Create a bar chart
+plt.figure(figsize=(10, 6))
+
+# Bar plot for NOPM means with customized colors
+colors = ['#395055', '#407580',  '#3997AA', '#1ED8E6'] # Blue shades for Small datasets
+
+
+
+plt.bar(mean_gemetric_mean.keys(), mean_gemetric_mean.values(), color=colors)
+
+# Adding labels and title
+plt.xlabel('Dataset')
+plt.ylabel('Mean Geometric Mean')
+plt.title('Mean Geometric mean for different index configurations in TPCH')
+
+# Show plot
+plt.show()# Create a scatter plot
+# Create a boxplot
+plt.figure(figsize=(10, 6))
+
+# Combine the datasets into a list for plotting
+data = [
+    tpch_std_small['GeometricMean'],
+    tpch_add_indexes['GeometricMean'],
+    tpch_add_useful['GeometricMean']
+]
+
+# Boxplot for the datasets
+plt.boxplot(data, patch_artist=True, 
+            boxprops=dict(facecolor='#395055', color='#395055'),
+            medianprops=dict(color='white'),
+            flierprops=dict(markerfacecolor='red', marker='o', markersize=5, linestyle='None'))
+
+# Adding labels and title
+plt.xlabel('Dataset')
+plt.ylabel('Geometric Mean')
+plt.title('Boxplot for Geometric Mean for different index configurations in TPCH')
+
+# Customizing x-axis for clarity
+plt.xticks([1, 2, 3], ['Baseline S', 'Added S', 'Dropped S'])
+
+# Show plot
+plt.show()# Combine the datasets into a list for plotting
+
+
+# Load the CSV into the DataFrame
+tpch_std_queries = pd.read_csv('../TPCH_RESULTS/query_times_TPCH_TPCH_STANDARD.csv')
+tpch_add_indexes_queries = pd.read_csv('../TPCH_RESULTS/query_times_TPCH_ADD_INDEXES.csv')
+tpch_add_useful_queries = pd.read_csv('../TPCH_RESULTS/query_times_TPCH_ADD_USEFUL.csv')
+
+
+
+plt.figure(figsize=(10, 6))
+plt.bar(tpch_std_queries['QueryNumber'], tpch_std_queries['QueryTimeSeconds'], color='skyblue')
+plt.xlabel('Query Number')
+plt.ylabel('Query Time (Seconds)')
+plt.title('Query Execution Times with Added Indexes')
+plt.xticks(tpch_std_queries['QueryNumber'])
+plt.grid(True)
+
+# Show the plot
+plt.tight_layout()
+plt.show()
+
+plt.figure(figsize=(10, 6))
+plt.bar(tpch_add_indexes_queries['QueryNumber'], tpch_add_indexes_queries['QueryTimeSeconds'], color='skyblue')
+plt.xlabel('Query Number')
+plt.ylabel('Query Time (Seconds)')
+plt.title('Query Execution Times with Added Indexes')
+plt.xticks(tpch_add_indexes_queries['QueryNumber'])
+plt.grid(True)
+
+# Show the plot
+plt.tight_layout()
+plt.show()
+
+plt.figure(figsize=(10, 6))
+plt.bar(tpch_add_useful_queries['QueryNumber'], tpch_add_useful_queries['QueryTimeSeconds'], color='skyblue')
+plt.xlabel('Query Number')
+plt.ylabel('Query Time (Seconds)')
+plt.title('Query Execution Times with Added Indexes')
+plt.xticks(tpch_add_useful_queries['QueryNumber'])
+plt.grid(True)
+
+# Show the plot
+plt.tight_layout()
+plt.show()
