@@ -107,46 +107,70 @@ print(tpch_std_queries.head(5))
 print(tpch_add_indexes_queries.head(5))
 print(tpch_add_useful_queries.head(5))
 
-# Merge DataFrames on QueryNumber
-merged = tpch_std_queries.merge(
-    tpch_add_indexes_queries[['QueryNumber', 'QueryTimeSeconds']],
-    on='QueryNumber',
-    suffixes=('_std', '_index')
-).merge(
-    tpch_add_useful_queries[['QueryNumber', 'QueryTimeSeconds']],
-    on='QueryNumber'
-).rename(columns={'QueryTimeSeconds': 'QueryTimeSeconds_useful'})
+# Load the CSV into the DataFrame
+tpch_std_qmeans = pd.read_csv('../TPCH_RESULTS/TPCH_STANDARD_query_means.csv')
+tpch_add_indexes_qmeans = pd.read_csv('../TPCH_RESULTS/ADD_INDEXES_query_means.csv')
+tpch_add_useful_qmeans = pd.read_csv('../TPCH_RESULTS/ADD_USEFUL_query_means.csv')
 
-# Calculate percentage changes relative to standard configuration
-merged['pct_change_index'] = ((merged['QueryTimeSeconds_index'] - merged['QueryTimeSeconds_std']) / merged['QueryTimeSeconds_std']) * 100
-merged['pct_change_useful'] = ((merged['QueryTimeSeconds_useful'] - merged['QueryTimeSeconds_std']) / merged['QueryTimeSeconds_std']) * 100
 
-# Sort by QueryNumber for consistent ordering
-merged = merged.sort_values('QueryNumber').reset_index(drop=True)
 
-# Prepare data for plotting
-x = np.arange(len(merged))  # Create an array for the x positions
-width = 0.35  # Width of the bars
+# Calculate the percentage difference compared to the standard
+# Formula: ((new - standard) / standard) * 100
 
-# Assign colors based on improvement (green) or degradation (red)
-colors_index = ['green' if val < 0 else 'red' for val in merged['pct_change_index']]
-colors_useful = ['green' if val < 0 else 'red' for val in merged['pct_change_useful']]
+add_indexes_pct_change = ((tpch_add_indexes_qmeans['MeanTimeSeconds'] - tpch_std_qmeans['MeanTimeSeconds']) / tpch_std_qmeans['MeanTimeSeconds']) * 100
+add_useful_pct_change = ((tpch_add_useful_qmeans['MeanTimeSeconds'] - tpch_std_qmeans['MeanTimeSeconds']) / tpch_std_qmeans['MeanTimeSeconds']) * 100
 
-# Create the plot
-plt.figure(figsize=(14, 7))
-plt.bar(x - width/2, merged['pct_change_index'], width, color=colors_index, label='Added Indexes')
-plt.bar(x + width/2, merged['pct_change_useful'], width, color=colors_useful, label='Added Useful')
+# If you want to put it nicely into a DataFrame:
+result = pd.DataFrame({
+    'QueryNumber': tpch_std_qmeans['QueryNumber'],
+    'Standard_MeanTimeSeconds': tpch_std_qmeans['MeanTimeSeconds'],
+    'Add_Indexes_MeanTimeSeconds': tpch_add_indexes_qmeans['MeanTimeSeconds'],
+    'Add_Indexes_PercentChange': add_indexes_pct_change,
+    'Add_Useful_MeanTimeSeconds': tpch_add_useful_qmeans['MeanTimeSeconds'],
+    'Add_Useful_PercentChange': add_useful_pct_change
+})
 
-# Customize the plot
-plt.xlabel('Query Number')
-plt.ylabel('Percentage Change (%)')
-plt.title('Percentage Change in Query Execution Time Compared to Standard Configuration')
-plt.xticks(x, merged['QueryNumber'])  # Set x-ticks to actual query numbers
-plt.axhline(0, color='black', linewidth=0.8)  # Add a baseline at 0%
-plt.grid(True, linestyle='--', alpha=0.7)
-plt.legend()
+# Set a nice big figure
+# plt.figure(figsize=(14, 7))
 
-# Show the plot
-plt.tight_layout()
+# # Plot both % changes
+# plt.plot(result['QueryNumber'], result['Add_Indexes_PercentChange'], marker='o', label='Add Indexes % Change')
+# plt.plot(result['QueryNumber'], result['Add_Useful_PercentChange'], marker='s', label='Add Useful % Change')
+
+# # Add a horizontal line at 0% for reference
+# plt.axhline(0, color='black', linewidth=0.8, linestyle='--')
+
+# # Add labels and title
+# plt.xlabel('Query Number')
+# plt.ylabel('Percentage Change (%)')
+# plt.title('Percentage Change in Mean Time per Query Compared to Standard')
+# plt.legend()
+# plt.grid(True)
+
+# # Show the plot
+# plt.show()
+
+# Set up
+x = np.arange(len(result['QueryNumber']))  # the label locations
+width = 0.35  # width of the bars
+
+fig, ax = plt.subplots(figsize=(16, 8))
+
+# Plot bars
+rects1 = ax.bar(x - width/2, result['Add_Indexes_PercentChange'], width, label='Add Indexes % Change')
+rects2 = ax.bar(x + width/2, result['Add_Useful_PercentChange'], width, label='Add Useful % Change')
+
+# Add a horizontal line at 0%
+ax.axhline(0, color='black', linewidth=0.8)
+
+# Labels and title
+ax.set_xlabel('Query Number')
+ax.set_ylabel('Percentage Change (%)')
+ax.set_title('Percentage Change in Mean Time per Query Compared to Standard')
+ax.set_xticks(x)
+ax.set_xticklabels(result['QueryNumber'])
+ax.legend()
+ax.grid(True, axis='y')
+
+fig.tight_layout()
 plt.show()
-
