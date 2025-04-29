@@ -1,13 +1,13 @@
 export TMP=`pwd`/TMP
 mkdir -p $TMP
 
-INDEX_SETTING="ADD_USEFUL"
+INDEX_SETTING="ADD_INDEXES"
 TIMESTAMP=$(TZ="Europe/Stockholm" date +"%Y%m%d_%H%M%S")
 RUN_DIR="${RESULTS_DIR}/TPCH/${INDEX_SETTING}/${TIMESTAMP}"
 PG_METRICS_DIR="${RUN_DIR}/postgres_metrics"
 mkdir -p ${PG_METRICS_DIR}
 
-echo "BUILD HAMMERDB SCHEMA WITH ADITIONAL USEFUL MULTI-COLOMN INDEXES"
+echo "BUILD HAMMERDB SCHEMA WITH ADDITIONAL MULTI-COLOMN INDEXES"
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 ./hammerdbcli py auto ./scripts/python/postgres/tproch/pg_tproch_buildschema.py
 echo "BUILD FINISHED"
@@ -30,8 +30,29 @@ FROM pg_indexes
 WHERE schemaname = 'public'
 ORDER BY column_count DESC, table_name, index_name;
 
-CREATE INDEX partsupp_partkey_suppkey_availqty_idx 
+-- 1. LineItem: Speeds up date-range filters (ship/receipt dates) and joins with Orders via l_orderkey.  
+CREATE INDEX lineitem_shipdate_receiptdate_orderkey_idx
+ON lineitem (l_shipdate, l_receiptdate, l_orderkey);
+
+-- 2. Orders: Optimizes time-based queries (order date) and customer joins (custkey).  
+CREATE INDEX orders_orderdate_custkey_idx
+ON orders (o_orderdate, o_custkey);
+
+-- 3. Customer: Accelerates filtering by nation and market segment (e.g., "customers in Germany in the automotive sector").
+CREATE INDEX customer_nationkey_mktsegment_idx
+ON customer (c_nationkey, c_mktsegment);
+
+-- 4. Part: Streamlines part categorization queries (brand, type, size).  
+CREATE INDEX part_brand_type_size_idx
+ON part (p_brand, p_type, p_size);
+
+-- 5. PartSupp: Enables fast stock availability checks via index-only scans (avoids table lookups). 
+CREATE INDEX partsupp_partkey_suppkey_availqty_idx
 ON partsupp (ps_partkey, ps_suppkey) INCLUDE (ps_availqty);
+
+-- 6. Supplier: Improves filtering by nation and sorting/analyzing supplier financials (account balance). 
+CREATE INDEX supplier_nationkey_acctbal_idx
+ON supplier (s_nationkey, s_acctbal);
 
 -- Update query planner info
 ANALYZE VERBOSE;
@@ -129,12 +150,6 @@ ORDER BY idx_scan DESC;
 
 -- Save database size info to CSV
 \copy (SELECT pg_database_size('tpch') AS total_size_bytes, (SELECT SUM(pg_relation_size(indexrelid)) FROM pg_stat_user_indexes) AS index_size_total_bytes, (SELECT SUM(pg_total_relation_size(relid)) FROM pg_stat_user_tables) AS table_size_total_bytes) TO '${DB_SIZE_REPORT}' CSV HEADER;
-
-SELECT 
-  pg_size_pretty(pg_database_size('tpch')) AS "Total Database Size",
-  pg_size_pretty(SUM(pg_relation_size(indexrelid))) AS "Total Index Size",
-  pg_size_pretty(SUM(pg_total_relation_size(relid))) AS "Total Table Size"
-FROM pg_stat_user_indexes, pg_stat_user_tables;
 EOF
 
 echo "DROP HAMMERDB SCHEMA"

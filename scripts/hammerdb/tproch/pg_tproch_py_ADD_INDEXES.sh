@@ -48,8 +48,32 @@ ON partsupp (ps_partkey, ps_suppkey) INCLUDE (ps_availqty);
 CREATE INDEX supplier_nationkey_acctbal_idx 
 ON supplier (s_nationkey, s_acctbal);
 
+-- 1. LineItem: Speeds up date-range filters (ship/receipt dates) and joins with Orders via l_orderkey.  
+CREATE INDEX lineitem_shipdate_receiptdate_orderkey_idx
+ON lineitem (l_shipdate, l_receiptdate, l_orderkey);
+
+-- 2. Orders: Optimizes time-based queries (order date) and customer joins (custkey).  
+CREATE INDEX orders_orderdate_custkey_idx
+ON orders (o_orderdate, o_custkey);
+
+-- 3. Customer: Accelerates filtering by nation and market segment (e.g., "customers in Germany in the automotive sector").
+CREATE INDEX customer_nationkey_mktsegment_idx
+ON customer (c_nationkey, c_mktsegment);
+
+-- 4. Part: Streamlines part categorization queries (brand, type, size).  
+CREATE INDEX part_brand_type_size_idx
+ON part (p_brand, p_type, p_size);
+
+-- 5. PartSupp: Enables fast stock availability checks via index-only scans (avoids table lookups). 
+CREATE INDEX partsupp_partkey_suppkey_availqty_idx
+ON partsupp (ps_partkey, ps_suppkey) INCLUDE (ps_availqty);
+
+-- 6. Supplier: Improves filtering by nation and sorting/analyzing supplier financials (account balance). 
+CREATE INDEX supplier_nationkey_acctbal_idx
+ON supplier (s_nationkey, s_acctbal);
+
 -- Update query planner info
--- ANALYZE VERBOSE;
+ANALYZE VERBOSE;
 
 \echo '=== Current Indexes ==='
 SELECT 

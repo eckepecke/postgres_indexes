@@ -7,6 +7,26 @@ RUN_DIR="${RESULTS_DIR}/TPCH/${INDEX_SETTING}/${TIMESTAMP}"
 PG_METRICS_DIR="${RUN_DIR}/postgres_metrics"
 mkdir -p ${PG_METRICS_DIR}
 
+PGPASSWORD="postgres" psql -h postgres -U postgres -d postgres <<EOF
+
+\echo '\n=== Planning Times ==='
+CREATE EXTENSION pg_stat_statements;
+
+SELECT
+  query,
+  calls,
+  total_plan_time,
+  total_exec_time,
+  (total_plan_time / calls) AS avg_plan_time_ms,
+  (total_exec_time / calls) AS avg_exec_time_ms
+FROM
+  pg_stat_statements
+ORDER BY
+  avg_plan_time_ms DESC
+LIMIT 20;
+
+EOF
+
 echo "BUILD HAMMERDB SCHEMA WITH ADITIONAL USEFUL MULTI-COLOMN INDEXES"
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 ./hammerdbcli py auto ./scripts/python/postgres/tproch/pg_tproch_buildschema.py
@@ -17,7 +37,7 @@ echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 ./hammerdbcli py auto ./scripts/python/postgres/tproch/pg_tproch_checkschema.py
 echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-"
 
-PGPASSWORD="tpch" psql -h postgres -U tpch -d tpch <<EOF
+PGPASSWORD="tpch" psql -h postgres -U postgres -d tpch <<EOF
 
 -- 1. Verify index state
 \echo '=== Current Indexes ==='
@@ -30,8 +50,6 @@ FROM pg_indexes
 WHERE schemaname = 'public'
 ORDER BY column_count DESC, table_name, index_name;
 
-CREATE INDEX partsupp_partkey_suppkey_availqty_idx 
-ON partsupp (ps_partkey, ps_suppkey) INCLUDE (ps_availqty);
 
 -- Update query planner info
 ANALYZE VERBOSE;
@@ -135,6 +153,27 @@ SELECT
   pg_size_pretty(SUM(pg_relation_size(indexrelid))) AS "Total Index Size",
   pg_size_pretty(SUM(pg_total_relation_size(relid))) AS "Total Table Size"
 FROM pg_stat_user_indexes, pg_stat_user_tables;
+
+
+\echo '\n=== Planning Times ==='
+CREATE EXTENSION pg_stat_statements;
+
+SELECT
+  query,
+  calls,
+  total_plan_time,
+  total_exec_time,
+  (total_plan_time / calls) AS avg_plan_time_ms,
+  (total_exec_time / calls) AS avg_exec_time_ms
+FROM
+  pg_stat_statements
+ORDER BY
+  avg_plan_time_ms DESC
+LIMIT 20;
+
+-- Save query planning times to CSV
+\copy (SELECT query, calls, total_plan_time, total_exec_time, (total_plan_time / calls) AS avg_plan_time_ms, (total_exec_time / calls) AS avg_exec_time_ms FROM pg_stat_statements ORDER BY avg_plan_time_ms DESC LIMIT 20) TO '${PLANNING_TIMES}' CSV HEADER;
+
 EOF
 
 echo "DROP HAMMERDB SCHEMA"

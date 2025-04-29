@@ -12,8 +12,6 @@ diset('connection','pg_sslmode','prefer')
 
 vu = int(os.getenv('HAMMERDB_VU', 4))  # Default: 4 virtual users
 sf = int(os.getenv('HAMMERDB_SCALE_FACTOR', 1))  # Default: SCALE FACTOR 1
-print('HEHHEHEHEHEHEHEH')
-print(sf)
 
 
 # vu = tclpy.eval('numberOfCPUs')
