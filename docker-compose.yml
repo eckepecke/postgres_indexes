@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   postgres:
-    image: postgres:1.1
+    image: eckepecke/postgres:1.1
     container_name: exjobb-postgres-1
     ports:
       - "5432:5432"
@@ -12,7 +12,7 @@ services:
       - postgres-net
 
   hammerdb:
-    image: hammerdb:1.1
+    image: eckepecke/hammerdb:1.1
     platform: linux/amd64 # Required for M1/M2 Macs
     container_name: exjobb-hammerdb
     environment:

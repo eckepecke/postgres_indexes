@@ -30,27 +30,9 @@ FROM pg_indexes
 WHERE schemaname = 'public'
 ORDER BY column_count DESC, table_name, index_name;
 
+-- 1. LineItem: Speeds up date-range filters (ship/receipt dates) and joins with Orders via l_orderkey.  
 CREATE INDEX lineitem_shipdate_orderkey_idx 
 ON lineitem (l_shipdate, l_orderkey);
-
-CREATE INDEX orders_orderdate_custkey_idx 
-ON orders (o_orderdate, o_custkey);
-
-CREATE INDEX customer_nationkey_mktsegment_idx 
-ON customer (c_nationkey, c_mktsegment);
-
-CREATE INDEX part_brand_type_size_idx 
-ON part (p_brand, p_type, p_size);
-
-CREATE INDEX partsupp_partkey_suppkey_availqty_idx 
-ON partsupp (ps_partkey, ps_suppkey) INCLUDE (ps_availqty);
-
-CREATE INDEX supplier_nationkey_acctbal_idx 
-ON supplier (s_nationkey, s_acctbal);
-
--- 1. LineItem: Speeds up date-range filters (ship/receipt dates) and joins with Orders via l_orderkey.  
-CREATE INDEX lineitem_shipdate_receiptdate_orderkey_idx
-ON lineitem (l_shipdate, l_receiptdate, l_orderkey);
 
 -- 2. Orders: Optimizes time-based queries (order date) and customer joins (custkey).  
 CREATE INDEX orders_orderdate_custkey_idx

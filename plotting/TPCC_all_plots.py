@@ -2,25 +2,48 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
-# Load the CSV into the DataFrame
-tpcc_std_small = pd.read_csv('../TPCC_RESULTS/results_TPCC_SMALL_TPCC_STANDARD.csv')
-tpcc_std_medium = pd.read_csv('../TPCC_RESULTS/results_TPCC_MEDIUM_TPCC_STANDARD.csv')
-tpcc_std_big = pd.read_csv('../TPCC_RESULTS/results_TPCC_BIG_TPCC_STANDARD.csv')
+# Function to filter out outliers
+def filter_outliers(df):
+    return df[(df['is_outlier_NOPM'] == False) & (df['is_outlier_TPM'] == False)]
 
-# Load the CSV into the DataFrame
-add_indexes_small = pd.read_csv('../TPCC_RESULTS/results_TPCC_SMALL_ADD_INDEXES.csv')
-add_indexes_medium = pd.read_csv('../TPCC_RESULTS/results_TPCC_MEDIUM_ADD_INDEXES.csv')
-add_indexes_big = pd.read_csv('../TPCC_RESULTS/results_TPCC_BIG_ADD_INDEXES.csv')
+# # Load the CSV into the DataFrame
+# tpcc_std_small = pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_SMALL_TPCC_STANDARD_analysis.csv')
+# tpcc_std_medium = pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_MEDIUM_TPCC_STANDARD_analysis.csv')
+# tpcc_std_big = pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_BIG_TPCC_STANDARD_analysis.csv')
 
-# Load the CSV into the DataFrame
-drop_indexes_small = pd.read_csv('../TPCC_RESULTS/results_TPCC_SMALL_DROP_INDEXES.csv')
-drop_indexes_medium = pd.read_csv('../TPCC_RESULTS/results_TPCC_MEDIUM_DROP_INDEXES.csv')
-drop_indexes_big = pd.read_csv('../TPCC_RESULTS/results_TPCC_BIG_DROP_INDEXES.csv')
+# # Load the CSV into the DataFrame
+# add_indexes_small = pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_SMALL_ADD_INDEXES_analysis.csv')
+# add_indexes_medium = pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_MEDIUM_ADD_INDEXES_analysis.csv')
+# add_indexes_big = pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_BIG_ADD_INDEXES_analysis.csv')
 
-# Load the CSV into the DataFrame
-add_read_heavy_small = pd.read_csv('../TPCC_RESULTS/results_TPCC_SMALL_ADD_READ_HEAVY.csv')
-add_read_heavy_medium = pd.read_csv('../TPCC_RESULTS/results_TPCC_MEDIUM_ADD_READ_HEAVY.csv')
-add_read_heavy_big = pd.read_csv('../TPCC_RESULTS/results_TPCC_BIG_ADD_READ_HEAVY.csv')
+# # Load the CSV into the DataFrame
+# drop_indexes_small = pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_SMALL_DROP_INDEXES_analysis.csv')
+# drop_indexes_medium = pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_MEDIUM_DROP_INDEXES_analysis.csv')
+# drop_indexes_big = pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_BIG_DROP_INDEXES_analysis.csv')
+
+# # Load the CSV into the DataFrame
+# add_read_heavy_small = pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_SMALL_ADD_READ_HEAVY_analysis.csv')
+# add_read_heavy_medium = pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_MEDIUM_ADD_READ_HEAVY_analysis.csv')
+# add_read_heavy_big = pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_BIG_ADD_READ_HEAVY_analysis.csv')
+
+
+# Load and filter each dataset
+tpcc_std_small = filter_outliers(pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_SMALL_TPCC_STANDARD_analysis.csv'))
+tpcc_std_medium = filter_outliers(pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_MEDIUM_TPCC_STANDARD_analysis.csv'))
+tpcc_std_big = filter_outliers(pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_BIG_TPCC_STANDARD_analysis.csv'))
+
+add_indexes_small = filter_outliers(pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_SMALL_ADD_INDEXES_analysis.csv'))
+add_indexes_medium = filter_outliers(pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_MEDIUM_ADD_INDEXES_analysis.csv'))
+add_indexes_big = filter_outliers(pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_BIG_ADD_INDEXES_analysis.csv'))
+
+drop_indexes_small = filter_outliers(pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_SMALL_DROP_INDEXES_analysis.csv'))
+drop_indexes_medium = filter_outliers(pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_MEDIUM_DROP_INDEXES_analysis.csv'))
+drop_indexes_big = filter_outliers(pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_BIG_DROP_INDEXES_analysis.csv'))
+
+add_read_heavy_small = filter_outliers(pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_SMALL_ADD_READ_HEAVY_analysis.csv'))
+add_read_heavy_medium = filter_outliers(pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_MEDIUM_ADD_READ_HEAVY_analysis.csv'))
+add_read_heavy_big = filter_outliers(pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_BIG_ADD_READ_HEAVY_analysis.csv'))
+
 
 # Calculate the mean NOPM for each dataset
 mean_nopm = {

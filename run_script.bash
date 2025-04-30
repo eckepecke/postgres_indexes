@@ -89,7 +89,7 @@
 #     done
 
 #     ./execution_script_tpcc.bash 8 32 ADD_READ_HEAVY
-done
+#done
 
 for i in {1..2}; do
     echo "Run #$i"

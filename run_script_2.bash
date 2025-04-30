@@ -39,7 +39,6 @@ for i in {1..4}; do
     ./execution_script_tpch.bash 1 1 ADD_INDEXES
 done
 
-
 for i in {1..2}; do
     echo "Run #$i"
     docker compose down -v
@@ -52,8 +51,3 @@ for i in {1..2}; do
 
     ./execution_script_tpcc.bash 50 200 ADD_READ_HEAVY
 done
-
-
-
-
-

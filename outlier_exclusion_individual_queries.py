@@ -25,7 +25,7 @@ def process_file(input_path, output_path):
         median_time = filtered.median()
         
         # Calculate 95% CI using bootstrapping
-        res = bootstrap((filtered,), np.median, confidence_level=0.95)
+        res = bootstrap((filtered,), np.median, confidence_level=0.95, method='basic')
         ci_low, ci_high = res.confidence_interval
         
         results.append({
