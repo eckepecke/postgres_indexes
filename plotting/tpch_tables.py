@@ -4,10 +4,21 @@ import matplotlib.ticker as ticker
 from tabulate import tabulate
 
 
-# Load the CSV into the DataFrame
-tpch_standard = pd.read_csv('../TPCH_RESULTS/results_TPCH_TPCH_STANDARD.csv')
-add_indexes = pd.read_csv('../TPCH_RESULTS/results_TPCH_ADD_INDEXES.csv')
-add_useful = pd.read_csv('../TPCH_RESULTS/results_TPCH_ADD_USEFUL.csv')
+# # Load the CSV into the DataFrame
+# tpch_standard = pd.read_csv('../TPCH_RESULTS/results_TPCH_TPCH_STANDARD.csv')
+# add_indexes = pd.read_csv('../TPCH_RESULTS/results_TPCH_ADD_INDEXES.csv')
+# add_useful = pd.read_csv('../TPCH_RESULTS/results_TPCH_ADD_USEFUL.csv')
+
+
+# Function to filter out outliers
+def filter_outliers(df):
+    return df[(df['is_outlier'] == False)]
+
+# Load and filter each dataset
+tpch_standard = filter_outliers(pd.read_csv('../TPCH_RESULTS/processed/results_TPCH_TPCH_STANDARD_GeometricMean_analysis.csv'))
+add_indexes = filter_outliers(pd.read_csv('../TPCH_RESULTS/processed/results_TPCH_ADD_INDEXES_GeometricMean_analysis.csv'))
+add_useful = filter_outliers(pd.read_csv('../TPCH_RESULTS/processed/results_TPCH_ADD_USEFUL_GeometricMean_analysis.csv'))
+
 
 # Calculate the mean TPM for each dataset
 mean_gm = {

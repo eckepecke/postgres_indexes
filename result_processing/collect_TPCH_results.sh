@@ -2,9 +2,9 @@
 
 SETTING=$1
 
-TARGET_DIR="hammerdb_results/TPCH/${SETTING}"
+TARGET_DIR="../hammerdb_results/TPCH/${SETTING}"
 
-OUTPUT_DIR="TPCH_RESULTS"
+OUTPUT_DIR="../TPCH_RESULTS"
 mkdir -p "$OUTPUT_DIR"
 OUTPUT_FILE="${OUTPUT_DIR}/results_TPCH_${SETTING}.csv"
 QUERY_TIMES_FILE="${OUTPUT_DIR}/query_times_TPCH_${SETTING}.csv"

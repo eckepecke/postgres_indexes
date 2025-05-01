@@ -6,27 +6,6 @@ import matplotlib.ticker as ticker
 def filter_outliers(df):
     return df[(df['is_outlier_NOPM'] == False) & (df['is_outlier_TPM'] == False)]
 
-# # Load the CSV into the DataFrame
-# tpcc_std_small = pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_SMALL_TPCC_STANDARD_analysis.csv')
-# tpcc_std_medium = pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_MEDIUM_TPCC_STANDARD_analysis.csv')
-# tpcc_std_big = pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_BIG_TPCC_STANDARD_analysis.csv')
-
-# # Load the CSV into the DataFrame
-# add_indexes_small = pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_SMALL_ADD_INDEXES_analysis.csv')
-# add_indexes_medium = pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_MEDIUM_ADD_INDEXES_analysis.csv')
-# add_indexes_big = pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_BIG_ADD_INDEXES_analysis.csv')
-
-# # Load the CSV into the DataFrame
-# drop_indexes_small = pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_SMALL_DROP_INDEXES_analysis.csv')
-# drop_indexes_medium = pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_MEDIUM_DROP_INDEXES_analysis.csv')
-# drop_indexes_big = pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_BIG_DROP_INDEXES_analysis.csv')
-
-# # Load the CSV into the DataFrame
-# add_read_heavy_small = pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_SMALL_ADD_READ_HEAVY_analysis.csv')
-# add_read_heavy_medium = pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_MEDIUM_ADD_READ_HEAVY_analysis.csv')
-# add_read_heavy_big = pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_BIG_ADD_READ_HEAVY_analysis.csv')
-
-
 # Load and filter each dataset
 tpcc_std_small = filter_outliers(pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_SMALL_TPCC_STANDARD_analysis.csv'))
 tpcc_std_medium = filter_outliers(pd.read_csv('../TPCC_RESULTS/processed/results_TPCC_MEDIUM_TPCC_STANDARD_analysis.csv'))
@@ -90,7 +69,7 @@ plt.xticks(x_positions, mean_nopm.keys(), rotation=45, ha='right')
 # Adding labels and title
 plt.xlabel('Dataset')
 plt.ylabel('Mean NOPM (New Orders per Minute)')
-plt.title('Mean NOPM for Small, Medium, and Big Datasets with and without Add Indexes')
+plt.title('Mean NOPM for all Index Configurations grouped by Dataset Size')
 
 plt.tight_layout()
 plt.show()
@@ -139,7 +118,7 @@ plt.xticks(x_positions, mean_tpm.keys(), rotation=45, ha='right')
 # Adding labels and title
 plt.xlabel('Dataset')
 plt.ylabel('Mean TPM (Transactions per Minute)')
-plt.title('Mean TPM for Small, Medium, and Big Datasets with and without Add Indexes')
+plt.title('Mean TPM for all Index Configurations grouped by Dataset Size')
 
 plt.tight_layout()
 plt.show()
@@ -187,7 +166,7 @@ plt.xticks(x_positions, mean_storage.keys(), rotation=45, ha='right')
 # Add labels and title
 plt.xlabel('Dataset')
 plt.ylabel('Mean Total Index Storage (Bytes)')
-plt.title('Mean Storage for Small, Medium, and Big Datasets with and without Add Indexes')
+plt.title('Mean Storage for all Index Configurations grouped by Dataset Size')
 
 # Format y-axis with commas
 ax = plt.gca()

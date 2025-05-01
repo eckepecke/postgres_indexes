@@ -78,7 +78,7 @@
 #     ./execution_script_tpcc.bash 8 32 DROP_INDEXES
 # done
 
-# for i in {1..5}; do
+# for i in {1..1}; do
 #     echo "Run #$i"
 #     docker compose down -v
 
@@ -88,10 +88,10 @@
 #         sleep 1
 #     done
 
-#     ./execution_script_tpcc.bash 8 32 ADD_READ_HEAVY
-#done
+#     ./execution_script_tpcc.bash 8 32 ADD_INDEXES
+# done
 
-for i in {1..2}; do
+for i in {1..3}; do
     echo "Run #$i"
     docker compose down -v
 
@@ -101,5 +101,18 @@ for i in {1..2}; do
         sleep 1
     done
 
-    ./execution_script_tpcc.bash 50 200 ADD_READ_HEAVY
+    ./execution_script_tpcc.bash 8 32 TPCC_STANDARD
 done
+
+# for i in {1..3}; do
+#     echo "Run #$i"
+#     docker compose down -v
+
+#     # Wait until no containers are running or existing
+#     while [ "$(docker ps -aq)" ]; do
+#         echo "Waiting for all containers to be removed..."
+#         sleep 1
+#     done
+
+#     ./execution_script_tpcc.bash 50 200 ADD_INDEXES
+# done

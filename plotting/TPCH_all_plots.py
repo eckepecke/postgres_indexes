@@ -8,12 +8,11 @@ tpch_std = pd.read_csv('../TPCH_RESULTS/results_TPCH_TPCH_STANDARD.csv')
 tpch_add_indexes = pd.read_csv('../TPCH_RESULTS/results_TPCH_ADD_INDEXES.csv')
 tpch_add_useful = pd.read_csv('../TPCH_RESULTS/results_TPCH_ADD_USEFUL.csv')
 
-
 # Calculate the mean NOPM for each dataset
 mean_gemetric_mean = {
     'Baseline': tpch_std['GeometricMean'].mean(),
     'Added': tpch_add_indexes['GeometricMean'].mean(),
-    'Added useful': tpch_add_useful['GeometricMean'].mean(),
+    'Added Used': tpch_add_useful['GeometricMean'].mean(),
 }
 
 # Create a bar chart
@@ -22,44 +21,14 @@ plt.figure(figsize=(10, 6))
 # Bar plot for NOPM means with customized colors
 colors = ['#395055', '#407580',  '#3997AA', '#1ED8E6'] # Blue shades for Small datasets
 
-
-
 plt.bar(mean_gemetric_mean.keys(), mean_gemetric_mean.values(), color=colors)
 
 # Adding labels and title
-plt.xlabel('Dataset')
 plt.ylabel('Mean Geometric Mean')
-plt.title('Mean Geometric mean for different index configurations in TPCH')
+plt.title('Mean Query Latency (Geometric Mean) for all Index Configurations')
 
 # Show plot
-plt.show()# Create a scatter plot
-# Create a boxplot
-plt.figure(figsize=(10, 6))
-
-# Combine the datasets into a list for plotting
-data = [
-    tpch_std['GeometricMean'],
-    tpch_add_indexes['GeometricMean'],
-    tpch_add_useful['GeometricMean']
-]
-
-# Boxplot for the datasets
-plt.boxplot(data, patch_artist=True, 
-            boxprops=dict(facecolor='#395055', color='#395055'),
-            medianprops=dict(color='white'),
-            flierprops=dict(markerfacecolor='red', marker='o', markersize=5, linestyle='None'))
-
-# Adding labels and title
-plt.xlabel('Dataset')
-plt.ylabel('Geometric Mean')
-plt.title('Boxplot for Geometric Mean for different index configurations in TPCH')
-
-# Customizing x-axis for clarity
-plt.xticks([1, 2, 3], ['Baseline', 'Added', 'Added Useful'])
-
-# Show plot
-plt.show()# Combine the datasets into a list for plotting
-
+plt.show()
 
 # Load the CSV into the DataFrame
 tpch_std_queries = pd.read_csv('../TPCH_RESULTS/query_times_TPCH_TPCH_STANDARD.csv')
@@ -137,7 +106,7 @@ ax.bar(x - width/2, report['PctChange_Indexes'], width,
 
 ax.bar(x + width/2, report['PctChange_Useful'], width,
        yerr=useful_err,  # Use calculated error ranges
-       label='With Useful Indexes',
+       label='With Used Indexes',
        capsize=5)
 
 # Formatting (keep existing code)
@@ -159,7 +128,7 @@ plt.show()
 # Calculate the mean TPM for each dataset
 mean_storage = {
     'Baseline': tpch_std['TotalIndexStorageBytes'].mean(),
-    'Added Indexes': tpch_add_indexes['TotalIndexStorageBytes'].mean(),
+    'Added': tpch_add_indexes['TotalIndexStorageBytes'].mean(),
     'Added Used': tpch_add_useful['TotalIndexStorageBytes'].mean(),
 }
 
@@ -174,7 +143,6 @@ colors = ['#395055', '#407580',  '#3997AA',  # Blue shades for Small datasets
 plt.bar(mean_storage.keys(), mean_storage.values(), color=colors)
 
 # Adding labels and title
-plt.xlabel('Dataset')
 plt.ylabel('Mean Storage (in bytes)')
 plt.title('Mean storage for Baseline, Added Indexes, Added Used')
 

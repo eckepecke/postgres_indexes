@@ -3,9 +3,9 @@
 SIZE=$1
 SETTING=$2
 
-TARGET_DIR="hammerdb_results/TPCC/${SIZE}/${SETTING}"
+TARGET_DIR="../hammerdb_results/TPCC/${SIZE}/${SETTING}"
 
-OUTPUT_DIR="TPCC_RESULTS"
+OUTPUT_DIR="../TPCC_RESULTS"
 mkdir -p "$OUTPUT_DIR"
 OUTPUT_FILE="${OUTPUT_DIR}/results_TPCC_${SIZE}_${SETTING}.csv"
 
