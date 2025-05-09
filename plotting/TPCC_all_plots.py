@@ -67,9 +67,8 @@ plt.bar(x_positions, mean_nopm.values(), color=colors)
 plt.xticks(x_positions, mean_nopm.keys(), rotation=45, ha='right')
 
 # Adding labels and title
-plt.xlabel('Dataset')
+plt.xlabel('Configuration')
 plt.ylabel('Mean NOPM (New Orders per Minute)')
-plt.title('Mean NOPM for all Index Configurations grouped by Dataset Size')
 
 plt.tight_layout()
 plt.show()
@@ -116,9 +115,8 @@ plt.bar(x_positions, mean_tpm.values(), color=colors)
 plt.xticks(x_positions, mean_tpm.keys(), rotation=45, ha='right')
 
 # Adding labels and title
-plt.xlabel('Dataset')
+plt.xlabel('Configuration')
 plt.ylabel('Mean TPM (Transactions per Minute)')
-plt.title('Mean TPM for all Index Configurations grouped by Dataset Size')
 
 plt.tight_layout()
 plt.show()
@@ -164,9 +162,8 @@ plt.bar(x_positions, mean_storage.values(), color=colors)
 plt.xticks(x_positions, mean_storage.keys(), rotation=45, ha='right')
 
 # Add labels and title
-plt.xlabel('Dataset')
+plt.xlabel('Configuration')
 plt.ylabel('Mean Total Index Storage (Bytes)')
-plt.title('Mean Storage for all Index Configurations grouped by Dataset Size')
 
 # Format y-axis with commas
 ax = plt.gca()

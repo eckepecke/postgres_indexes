@@ -51,18 +51,23 @@ print(tabulate(df_rounded, headers='keys', tablefmt='grid'))
 
 
 # Load the CSV into the DataFrame
-final_report = pd.read_csv('../TPCH_RESULTS/final_report.csv')
+final_report = pd.read_csv('../TPCH_RESULTS/processed/final_report.csv')
 
 # Select only the columns we want
-result_table = final_report[['QueryNumber', 'PctChange_Useful']]
+result_table = final_report[['QueryNumber', 'PctChange_Indexes', 'PctChange_Useful']]
 
 # Round the percentage change to 2 decimal places
+result_table['PctChange_Indexes'] = result_table['PctChange_Indexes'].round(2)
 result_table['PctChange_Useful'] = result_table['PctChange_Useful'].round(2)
+
 
 # Rename columns for nicer display
 result_table = result_table.rename(columns={
     'QueryNumber': 'Query Number',
-    'PctChange_Useful': 'Performance Change (%)'
+    'PctChange_Indexes': 'Added(%)',
+    'PctChange_Useful': 'Useful(%)'
+
+    
 })
 
 # Display using tabulate

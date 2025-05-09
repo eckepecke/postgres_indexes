@@ -4,9 +4,15 @@ import numpy as np
 import matplotlib.ticker as ticker
 
 # Load the CSV into the DataFrame
-tpch_std = pd.read_csv('../TPCH_RESULTS/results_TPCH_TPCH_STANDARD.csv')
-tpch_add_indexes = pd.read_csv('../TPCH_RESULTS/results_TPCH_ADD_INDEXES.csv')
-tpch_add_useful = pd.read_csv('../TPCH_RESULTS/results_TPCH_ADD_USEFUL.csv')
+tpch_std = pd.read_csv('../TPCH_RESULTS/processed/results_TPCH_TPCH_STANDARD_GeometricMean_analysis.csv')
+tpch_add_indexes = pd.read_csv('../TPCH_RESULTS/processed/results_TPCH_ADD_INDEXES_GeometricMean_analysis.csv')
+tpch_add_useful = pd.read_csv('../TPCH_RESULTS/processed/results_TPCH_ADD_USEFUL_GeometricMean_analysis.csv')
+
+# # Load the CSV into the DataFrame
+# tpch_std = pd.read_csv('../TPCH_RESULTS/results_TPCH_TPCH_STANDARD.csv')
+# tpch_add_indexes = pd.read_csv('../TPCH_RESULTS/results_TPCH_ADD_INDEXES.csv')
+# tpch_add_useful = pd.read_csv('../TPCH_RESULTS/results_TPCH_ADD_USEFUL.csv')
+
 
 # Calculate the mean NOPM for each dataset
 mean_gemetric_mean = {
@@ -25,21 +31,19 @@ plt.bar(mean_gemetric_mean.keys(), mean_gemetric_mean.values(), color=colors)
 
 # Adding labels and title
 plt.ylabel('Mean Geometric Mean')
-plt.title('Mean Query Latency (Geometric Mean) for all Index Configurations')
 
 # Show plot
 plt.show()
 
 # Load the CSV into the DataFrame
-tpch_std_queries = pd.read_csv('../TPCH_RESULTS/query_times_TPCH_TPCH_STANDARD.csv')
-tpch_add_indexes_queries = pd.read_csv('../TPCH_RESULTS/query_times_TPCH_ADD_INDEXES.csv')
-tpch_add_useful_queries = pd.read_csv('../TPCH_RESULTS/query_times_TPCH_ADD_USEFUL.csv')
+tpch_std_queries = pd.read_csv('../TPCH_RESULTS/TPCH_STANDARD_query_means.csv')
+tpch_add_indexes_queries = pd.read_csv('../TPCH_RESULTS/ADD_INDEXES_query_means.csv')
+tpch_add_useful_queries = pd.read_csv('../TPCH_RESULTS/ADD_USEFUL_query_means.csv')
 
 plt.figure(figsize=(10, 6))
-plt.bar(tpch_std_queries['QueryNumber'], tpch_std_queries['QueryTimeSeconds'], color='skyblue')
-plt.xlabel('Query Number')
+plt.bar(tpch_std_queries['QueryNumber'], tpch_std_queries['MeanTimeSeconds'], color='skyblue')
+plt.xlabel('Query Number', fontsize=14)
 plt.ylabel('Query Time (Seconds)')
-plt.title('Query Execution Times with Added Indexes')
 plt.xticks(tpch_std_queries['QueryNumber'])
 plt.grid(True)
 
@@ -48,10 +52,9 @@ plt.tight_layout()
 plt.show()
 
 plt.figure(figsize=(10, 6))
-plt.bar(tpch_add_indexes_queries['QueryNumber'], tpch_add_indexes_queries['QueryTimeSeconds'], color='skyblue')
-plt.xlabel('Query Number')
+plt.bar(tpch_add_indexes_queries['QueryNumber'], tpch_add_indexes_queries['MeanTimeSeconds'], color='skyblue')
+plt.xlabel('Query Number', fontsize=14)
 plt.ylabel('Query Time (Seconds)')
-plt.title('Query Execution Times with Added Indexes')
 plt.xticks(tpch_add_indexes_queries['QueryNumber'])
 plt.grid(True)
 
@@ -60,10 +63,9 @@ plt.tight_layout()
 plt.show()
 
 plt.figure(figsize=(10, 6))
-plt.bar(tpch_add_useful_queries['QueryNumber'], tpch_add_useful_queries['QueryTimeSeconds'], color='skyblue')
-plt.xlabel('Query Number')
+plt.bar(tpch_add_useful_queries['QueryNumber'], tpch_add_useful_queries['MeanTimeSeconds'], color='skyblue')
+plt.xlabel('Query Number', fontsize=14)
 plt.ylabel('Query Time (Seconds)')
-plt.title('Query Execution Times with Added Indexes')
 plt.xticks(tpch_add_useful_queries['QueryNumber'])
 plt.grid(True)
 
@@ -78,7 +80,7 @@ print(tpch_add_useful_queries.head(5))
 import matplotlib.pyplot as plt
 
 # Load report data
-report = pd.read_csv('../TPCH_RESULTS/final_report.csv')
+report = pd.read_csv('../TPCH_RESULTS/processed/final_report.csv')
 
 # Calculate error bars for PERCENTAGE CHANGES using original CIs
 # For Add Indexes
@@ -144,7 +146,6 @@ plt.bar(mean_storage.keys(), mean_storage.values(), color=colors)
 
 # Adding labels and title
 plt.ylabel('Mean Storage (in bytes)')
-plt.title('Mean storage for Baseline, Added Indexes, Added Used')
 
 # Format y-axis with commas
 ax = plt.gca()  # Get current axis

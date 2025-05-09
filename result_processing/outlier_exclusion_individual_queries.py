@@ -42,6 +42,6 @@ def process_file(input_path, output_path):
 # Process all configurations
 configs = ['TPCH_STANDARD', 'ADD_INDEXES', 'ADD_USEFUL']
 for config in configs:
-    input_file = f'TPCH_RESULTS/query_times_TPCH_{config}.csv'
-    output_file = f'TPCH_RESULTS/{config}_processed.csv'
+    input_file = f'../TPCH_RESULTS/query_times_TPCH_{config}.csv'
+    output_file = f'../TPCH_RESULTS/{config}_processed.csv'
     process_file(input_file, output_file)

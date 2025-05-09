@@ -115,7 +115,7 @@ def main():
                         help='Directory containing CSV files to analyze (default: ../TPCH_results)')
     parser.add_argument('--metrics', nargs='+', default=['GeometricMean'],
                         help='Metrics to analyze for outliers (default: GeometricMean)')
-    parser.add_argument('--output_dir', help='Directory to save output files')
+    parser.add_argument('--output_dir', default='../TPCH_results/processed', help='Directory to save output files')
     parser.add_argument('--exclude', action='store_true', help='Output only non-outlier data in output files')
     parser.add_argument('--pattern', default='*.csv', help='File pattern to match (default: *.csv)')
     

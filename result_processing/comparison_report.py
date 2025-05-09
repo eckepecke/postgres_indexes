@@ -1,9 +1,9 @@
 import pandas as pd
 
 # Load processed data
-std = pd.read_csv('TPCH_RESULTS/TPCH_STANDARD_processed.csv')
-idx = pd.read_csv('TPCH_RESULTS/ADD_INDEXES_processed.csv')
-usf = pd.read_csv('TPCH_RESULTS/ADD_USEFUL_processed.csv')
+std = pd.read_csv('../TPCH_RESULTS/TPCH_STANDARD_processed.csv')
+idx = pd.read_csv('../TPCH_RESULTS/ADD_INDEXES_processed.csv')
+usf = pd.read_csv('../TPCH_RESULTS/ADD_USEFUL_processed.csv')
 
 # Merge data
 merged = std.merge(idx, on='QueryNumber', suffixes=('_std', '_idx')) \
@@ -25,7 +25,7 @@ report = merged[[
     'PctChange_Useful'
 ]]
 
-report.to_csv('TPCH_RESULTS/final_report.csv', index=False)
+report.to_csv('../TPCH_RESULTS/processed/final_report.csv', index=False)
 print(report)
 
 
